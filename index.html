@@ -1,0 +1,2206 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>✨ 三命鑑定 — 四柱推命 × 動物占い × 算命学</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#080618;
+  --purple:#a855f7;--indigo:#6366f1;--pink:#ec4899;--gold:#f59e0b;--cyan:#06b6d4;--green:#10b981;
+  --grad-dark:linear-gradient(160deg,#150a30 0%,#0d1545 50%,#080618 100%);
+}
+html{overflow-x:hidden;}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:#fff;min-height:100vh;overflow-x:hidden;}
+
+/* ======== PAGE SYSTEM ======== */
+.page{display:none;min-height:100vh;opacity:0;transform:translateX(30px);transition:opacity .4s ease,transform .4s ease;}
+.page.active{display:block;opacity:1;transform:translateX(0);}
+.page.slide-out{opacity:0;transform:translateX(-30px);}
+
+/* ======== STARS ======== */
+#stars{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.star{position:absolute;border-radius:50%;background:white;animation:twinkle var(--dur,3s) var(--del,0s) ease-in-out infinite;}
+@keyframes twinkle{0%,100%{opacity:.1}50%{opacity:1}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes spinRing{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.08);opacity:1}}
+@keyframes shimmer{0%{background-position:-300% 0}100%{background-position:300% 0}}
+@keyframes countUp{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+
+/* ======== WRAP ======== */
+.wrap{max-width:480px;margin:0 auto;padding:0 18px;position:relative;z-index:1;}
+
+/* ======================================================
+   PAGE 1: INPUT
+   ====================================================== */
+#pg-input{background:var(--grad-dark);}
+
+.input-hero{text-align:center;padding:52px 0 32px;position:relative;z-index:1;}
+.badge-row{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+.badge{padding:5px 12px;border-radius:999px;font-size:.7rem;font-weight:700;letter-spacing:.05em;}
+.badge-purple{background:rgba(168,85,247,.18);border:1px solid rgba(168,85,247,.35);color:#c084fc;}
+.badge-gold{background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.3);color:#fbbf24;}
+.badge-cyan{background:rgba(6,182,212,.15);border:1px solid rgba(6,182,212,.3);color:#22d3ee;}
+.input-title{font-size:1.9rem;font-weight:900;line-height:1.25;margin-bottom:10px;}
+.title-grad{background:linear-gradient(135deg,#e8d5ff,#a5b4fc,#fbcfe8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.input-sub{font-size:.82rem;color:rgba(255,255,255,.55);line-height:1.7;}
+
+.form-card{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.09);border-radius:24px;padding:28px 24px;backdrop-filter:blur(20px);}
+.form-label{display:block;font-size:.78rem;color:rgba(255,255,255,.55);margin-bottom:8px;font-weight:500;letter-spacing:.02em;}
+.form-row{margin-bottom:18px;}
+.inp{width:100%;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.12);border-radius:12px;padding:13px 15px;color:#fff;font-size:.95rem;font-family:inherit;outline:none;transition:border-color .2s,background .2s;}
+.inp:focus{border-color:var(--purple);background:rgba(168,85,247,.1);}
+.inp::placeholder{color:rgba(255,255,255,.28);}
+.inp[type=number]{text-align:center;}
+.date-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.date-unit{font-size:.65rem;color:rgba(255,255,255,.35);text-align:center;margin-top:4px;}
+.time-wrap{display:flex;align-items:center;gap:12px;}
+.time-wrap input[type=range]{flex:1;accent-color:var(--purple);cursor:pointer;}
+.time-disp{background:rgba(255,255,255,.09);border-radius:10px;padding:7px 14px;font-weight:700;font-size:.9rem;min-width:64px;text-align:center;border:1px solid rgba(255,255,255,.12);}
+.sex-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.sex-btn{padding:13px;border-radius:12px;border:1.5px solid rgba(255,255,255,.18);background:rgba(255,255,255,.05);color:rgba(255,255,255,.65);font-size:.88rem;font-family:inherit;cursor:pointer;transition:all .2s;font-weight:500;}
+.sex-btn.on{border-color:var(--purple);background:rgba(168,85,247,.2);color:#fff;}
+.err{color:#f87171;font-size:.78rem;margin-top:8px;display:none;padding:8px 12px;background:rgba(239,68,68,.1);border-radius:8px;}
+
+.start-btn{width:100%;padding:17px;background:linear-gradient(135deg,#a855f7,#6366f1,#4f46e5);border:none;border-radius:16px;color:#fff;font-size:1.05rem;font-weight:900;font-family:inherit;cursor:pointer;transition:all .25s;margin-top:4px;letter-spacing:.06em;position:relative;overflow:hidden;}
+.start-btn::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);background-size:300%;animation:shimmer 3s linear infinite;}
+.start-btn:hover{transform:translateY(-2px);box-shadow:0 14px 44px rgba(168,85,247,.45);}
+.start-btn:active{transform:translateY(0);}
+.input-note{text-align:center;font-size:.68rem;color:rgba(255,255,255,.2);margin-top:12px;}
+.pb80{padding-bottom:80px;}
+
+/* ======================================================
+   PAGE 2: LOADING
+   ====================================================== */
+#pg-loading{background:var(--grad-dark);display:flex;align-items:center;justify-content:center;flex-direction:column;}
+.loading-inner{text-align:center;padding:40px 20px;}
+.orb-wrap{position:relative;width:120px;height:120px;margin:0 auto 32px;}
+.orb-core{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#a855f7,#6366f1);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);animation:pulse 2s ease-in-out infinite;box-shadow:0 0 50px rgba(168,85,247,.6);}
+.orb-ring{position:absolute;inset:0;border-radius:50%;border:2px solid transparent;border-top-color:rgba(168,85,247,.7);border-right-color:rgba(99,102,241,.5);animation:spinRing 1.8s linear infinite;}
+.orb-ring2{position:absolute;inset:8px;border-radius:50%;border:2px solid transparent;border-bottom-color:rgba(236,72,153,.5);animation:spinRing 2.4s linear infinite reverse;}
+.loading-title{font-size:1.3rem;font-weight:900;margin-bottom:8px;background:linear-gradient(135deg,#e8d5ff,#a5b4fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.loading-sub{font-size:.82rem;color:rgba(255,255,255,.45);margin-bottom:28px;}
+.steps{display:flex;flex-direction:column;gap:10px;max-width:260px;margin:0 auto;}
+.step{display:flex;align-items:center;gap:10px;padding:10px 16px;background:rgba(255,255,255,.04);border-radius:12px;font-size:.78rem;color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.06);transition:all .4s;}
+.step.done{color:#a855f7;background:rgba(168,85,247,.1);border-color:rgba(168,85,247,.25);}
+.step-dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0;}
+
+/* ======================================================
+   PAGE 3: RESULT
+   ====================================================== */
+#pg-result{background:var(--grad-dark);}
+
+/* Top bar */
+.topbar{position:sticky;top:0;z-index:200;background:rgba(8,6,24,.85);backdrop-filter:blur(24px);border-bottom:1px solid rgba(255,255,255,.07);padding:11px 0;}
+.topbar-inner{max-width:480px;margin:0 auto;padding:0 16px;display:flex;align-items:center;justify-content:space-between;}
+.topbar-back{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:6px 14px;color:rgba(255,255,255,.7);font-size:.78rem;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;transition:all .2s;}
+.topbar-back:hover{background:rgba(255,255,255,.14);color:#fff;}
+.topbar-title{font-size:.88rem;font-weight:700;color:rgba(255,255,255,.8);}
+.topbar-share{background:linear-gradient(135deg,rgba(168,85,247,.3),rgba(99,102,241,.3));border:1px solid rgba(168,85,247,.35);border-radius:20px;padding:6px 14px;color:#c084fc;font-size:.78rem;cursor:pointer;font-family:inherit;transition:all .2s;}
+.topbar-share:hover{background:rgba(168,85,247,.4);}
+
+/* Bottom tab */
+.btabs{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(8,6,24,.92);backdrop-filter:blur(24px);border-top:1px solid rgba(255,255,255,.07);padding:8px 0 max(8px,env(safe-area-inset-bottom));}
+.btabs-inner{max-width:480px;margin:0 auto;display:flex;justify-content:space-around;}
+.btab{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;color:rgba(255,255,255,.38);font-family:inherit;font-size:.58rem;cursor:pointer;padding:4px 10px;transition:color .2s;min-width:52px;}
+.btab.on{color:var(--purple);}
+.btab-icon{font-size:1.25rem;}
+
+/* Panels */
+.panel{display:none;}
+.panel.on{display:block;animation:fadeUp .35s ease-out;}
+.panel-scroll{padding-bottom:90px;}
+
+/* ---- HERO CARD ---- */
+.hero-card{margin:16px;border-radius:28px;overflow:hidden;position:relative;}
+.hero-bg{padding:32px 24px 24px;text-align:center;}
+.hero-badge-line{margin-bottom:14px;}
+.hero-b{display:inline-block;padding:4px 12px;border-radius:999px;font-size:.68rem;font-weight:700;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.85);}
+.hero-emoji{font-size:5.5rem;display:block;margin-bottom:6px;animation:float 3.5s ease-in-out infinite;filter:drop-shadow(0 6px 24px rgba(0,0,0,.5));}
+.hero-name{font-size:2.2rem;font-weight:900;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,.4);}
+.hero-type{font-size:.95rem;color:rgba(255,255,255,.75);margin-top:4px;}
+.hero-pillar{display:inline-block;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:5px 18px;margin-top:10px;font-size:.85rem;font-weight:700;}
+
+/* 称号 */
+.shogo{background:linear-gradient(135deg,rgba(0,0,0,.35),rgba(0,0,0,.2));border-top:1px solid rgba(255,255,255,.12);padding:14px 20px;text-align:center;}
+.shogo-lbl{font-size:.6rem;letter-spacing:.12em;color:rgba(255,255,255,.45);text-transform:uppercase;margin-bottom:6px;}
+.shogo-val{font-size:1.05rem;font-weight:700;background:linear-gradient(135deg,#fde68a,#f9a8d4,#c4b5fd);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+
+/* ---- 3 LAYER BADGES ---- */
+.triple{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:12px 16px;}
+.triple-c{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:14px 8px;text-align:center;}
+.tc-icon{font-size:1.35rem;margin-bottom:6px;}
+.tc-lbl{font-size:.58rem;color:rgba(255,255,255,.4);margin-bottom:4px;letter-spacing:.04em;}
+.tc-val{font-size:.9rem;font-weight:700;}
+.tc-sub{font-size:.62rem;color:rgba(255,255,255,.4);margin-top:3px;}
+
+/* ---- RADAR ---- */
+.radar-card{margin:8px 16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:20px 16px;}
+.sec-hd{font-size:.68rem;font-weight:700;color:rgba(255,255,255,.38);letter-spacing:.12em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.sec-hd::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.07);}
+.radar-canvas-wrap{text-align:center;margin-bottom:12px;}
+.radar-vals{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:12px;}
+.rv-cell{text-align:center;background:rgba(255,255,255,.04);border-radius:10px;padding:8px 4px;}
+.rv-lbl{font-size:.58rem;color:rgba(255,255,255,.4);margin-bottom:3px;}
+.rv-num{font-size:1rem;font-weight:700;color:#a855f7;}
+
+/* ---- 算命学 ---- */
+.sanmei-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 16px;}
+.sm-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px;text-align:center;}
+.sm-icon{font-size:1.4rem;margin-bottom:7px;}
+.sm-lbl{font-size:.6rem;color:rgba(255,255,255,.38);margin-bottom:5px;}
+.sm-val{font-size:.95rem;font-weight:700;margin-bottom:4px;}
+.sm-sub{font-size:.65rem;color:rgba(255,255,255,.45);line-height:1.5;}
+
+/* ---- 命式表 ---- */
+.meishiki-wrap{margin:8px 16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:18px 12px;}
+.msk-table{width:100%;border-collapse:separate;border-spacing:6px;margin:0 -6px;}
+.msk-th{font-size:.65rem;color:rgba(255,255,255,.38);text-align:center;padding-bottom:6px;font-weight:400;}
+.msk-cell{text-align:center;padding:10px 4px;background:rgba(255,255,255,.05);border-radius:12px;}
+.msk-kan{font-size:1.3rem;font-weight:700;}
+.msk-go{font-size:.6rem;color:rgba(255,255,255,.4);margin-top:2px;}
+.msk-ts{font-size:.62rem;color:#fde68a;padding:4px 0;text-align:center;}
+.msk-shi{font-size:1.3rem;font-weight:700;}
+.msk-ju{font-size:.58rem;color:rgba(255,255,255,.38);margin-top:2px;}
+.msk-note{font-size:.65rem;color:rgba(255,255,255,.3);text-align:center;margin-top:8px;}
+
+/* ---- 五行 ---- */
+.gogyo-wrap{margin:8px 16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:18px 16px;}
+.gogyo-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.gogyo-row:last-child{margin-bottom:0;}
+.gg-icon{font-size:.95rem;width:18px;text-align:center;}
+.gg-name{font-size:.78rem;color:rgba(255,255,255,.55);width:18px;}
+.gg-bar-bg{flex:1;height:9px;background:rgba(255,255,255,.07);border-radius:999px;overflow:hidden;}
+.gg-bar{height:100%;border-radius:999px;width:0%;transition:width 1.3s cubic-bezier(.4,0,.2,1);}
+.gg-num{font-size:.72rem;color:rgba(255,255,255,.4);width:18px;text-align:right;}
+
+/* ---- TEXT READING ---- */
+.reading{margin:8px 16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:18px;}
+.reading-hd{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.reading-icon{font-size:1.3rem;}
+.reading-title{font-size:.9rem;font-weight:700;}
+.reading-body{font-size:.82rem;color:rgba(255,255,255,.7);line-height:1.85;}
+.kw-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;}
+.kw{padding:5px 11px;border-radius:999px;font-size:.7rem;font-weight:500;}
+.kw-g{background:rgba(168,85,247,.18);border:1px solid rgba(168,85,247,.28);color:#c084fc;}
+.kw-b{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.22);color:#fca5a5;}
+
+/* ---- 運勢タブ ---- */
+.ft-tabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:16px 16px 12px;}
+.ft-tab{padding:11px 0;border-radius:12px;border:1.5px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:rgba(255,255,255,.45);font-size:.78rem;cursor:pointer;transition:all .2s;font-family:inherit;text-align:center;font-weight:500;}
+.ft-tab.on{background:rgba(245,158,11,.15);border-color:rgba(245,158,11,.4);color:#fbbf24;font-weight:700;}
+.ft-panel{display:none;}
+.ft-panel.on{display:block;animation:fadeUp .3s ease-out;}
+
+/* Fortune card */
+.fc{margin:0 16px 12px;border-radius:20px;padding:20px;position:relative;overflow:hidden;}
+.fc-date{font-size:.68rem;color:rgba(255,255,255,.45);margin-bottom:12px;}
+.fc-center{text-align:center;margin-bottom:18px;}
+.fc-circle{width:76px;height:76px;border-radius:50%;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:1.7rem;border:3px solid currentColor;}
+.fc-word{font-size:1.4rem;font-weight:900;margin-bottom:4px;}
+.fc-score{font-size:.75rem;color:rgba(255,255,255,.5);}
+.fc-areas{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.fc-area{background:rgba(255,255,255,.06);border-radius:12px;padding:12px;text-align:center;}
+.fc-a-icon{font-size:1.1rem;margin-bottom:5px;}
+.fc-a-lbl{font-size:.62rem;color:rgba(255,255,255,.45);margin-bottom:5px;}
+.fc-a-stars{font-size:.85rem;}
+.fc-msg{background:rgba(255,255,255,.06);border-radius:12px;padding:13px;margin-bottom:12px;}
+.fc-msg-ttl{font-size:.68rem;font-weight:700;margin-bottom:6px;}
+.fc-msg-body{font-size:.8rem;color:rgba(255,255,255,.72);line-height:1.75;}
+.fc-lucky{background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.18);border-radius:14px;padding:14px;}
+.fc-lucky-ttl{font-size:.68rem;color:#f59e0b;font-weight:700;letter-spacing:.08em;margin-bottom:10px;}
+.fc-lucky-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.lk-item{text-align:center;}
+.lk-icon{font-size:.95rem;margin-bottom:3px;}
+.lk-val{font-size:.85rem;font-weight:700;color:#fde68a;}
+.lk-lbl{font-size:.58rem;color:rgba(255,255,255,.35);}
+
+/* ---- Gauge ---- */
+.gauge-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.gauge-row:last-child{margin-bottom:0;}
+.g-lbl{font-size:.72rem;color:rgba(255,255,255,.55);width:56px;flex-shrink:0;}
+.g-bar-bg{flex:1;height:8px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden;}
+.g-bar{height:100%;border-radius:999px;width:0%;transition:width 1.2s ease-out;}
+.g-val{font-size:.72rem;color:rgba(255,255,255,.45);width:24px;text-align:right;flex-shrink:0;}
+
+/* ---- 相性 ---- */
+.compat-me-row{display:flex;align-items:center;gap:12px;padding:14px;background:rgba(255,255,255,.05);border-radius:16px;border:1px solid rgba(255,255,255,.08);margin-bottom:14px;}
+.cm-emoji{font-size:2.4rem;}
+.cm-info{flex:1;}
+.cm-name{font-size:.95rem;font-weight:700;}
+.cm-sub{font-size:.72rem;color:rgba(255,255,255,.45);margin-top:2px;}
+.compat-form{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:18px;margin:0 16px 12px;}
+.compat-lbl{font-size:.75rem;color:rgba(255,255,255,.5);margin-bottom:8px;}
+.compat-diag-btn{width:100%;padding:15px;background:linear-gradient(135deg,#ec4899,#f43f5e);border:none;border-radius:14px;color:#fff;font-size:1rem;font-weight:700;font-family:inherit;cursor:pointer;transition:all .2s;margin-top:10px;}
+.compat-diag-btn:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(236,72,153,.4);}
+.compat-result-wrap{display:none;}
+.compat-card{border-radius:24px;padding:24px;text-align:center;margin:0 16px 12px;}
+.compat-pair{display:flex;justify-content:center;align-items:center;gap:16px;margin-bottom:20px;}
+.cp-side{text-align:center;}
+.cp-emoji{font-size:2.8rem;display:block;margin-bottom:6px;}
+.cp-name{font-size:.72rem;color:rgba(255,255,255,.55);}
+.cp-heart{font-size:1.8rem;}
+.score-ring-wrap{position:relative;width:140px;height:140px;margin:0 auto 14px;}
+.score-ring-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.score-big{font-size:2.3rem;font-weight:900;}
+.score-max{font-size:.7rem;color:rgba(255,255,255,.4);}
+.compat-lv{font-size:1.2rem;font-weight:900;margin-bottom:8px;}
+.compat-desc-text{font-size:.8rem;color:rgba(255,255,255,.68);line-height:1.75;}
+
+/* ---- Toast ---- */
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:rgba(168,85,247,.9);padding:10px 24px;border-radius:999px;font-size:.82rem;font-weight:700;pointer-events:none;opacity:0;transition:opacity .3s;z-index:999;white-space:nowrap;}
+.toast.show{opacity:1;}
+
+/* ---- Scrollbar ---- */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-thumb{background:rgba(168,85,247,.25);border-radius:2px;}
+
+/* ---- Misc ---- */
+.sec-pad{padding:12px 0 0;}
+
+/* ======== SPECIAL PANEL ======== */
+.special-section { margin: 0 16px 18px; }
+.sp-title-row { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+.sp-title-icon { font-size:1.6rem; }
+.sp-title-text { font-size:1.05rem; font-weight:800; background:linear-gradient(90deg,#e8d5ff,#a5b4fc); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.sp-card { background:rgba(255,255,255,.045); border:1px solid rgba(255,255,255,.09); border-radius:18px; padding:18px; margin-bottom:14px; position:relative; overflow:hidden; }
+.sp-card::before { content:''; position:absolute; inset:0; background:var(--card-grad,linear-gradient(135deg,rgba(168,85,247,.08),rgba(99,102,241,.04))); pointer-events:none; }
+.sp-card-head { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+.sp-card-emoji { font-size:2rem; }
+.sp-card-label { font-size:.68rem; font-weight:700; color:rgba(255,255,255,.4); letter-spacing:.1em; text-transform:uppercase; }
+.sp-card-name { font-size:1.15rem; font-weight:900; color:#fff; line-height:1.2; }
+.sp-card-name span { background:linear-gradient(90deg,#f9a8d4,#c084fc,#818cf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.sp-card-sub { font-size:.8rem; color:rgba(255,255,255,.55); line-height:1.6; margin-bottom:10px; }
+.sp-stats { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; }
+.sp-stat { background:rgba(255,255,255,.05); border-radius:10px; padding:8px 10px; }
+.sp-stat-lbl { font-size:.62rem; color:rgba(255,255,255,.4); font-weight:700; margin-bottom:3px; }
+.sp-stat-val { font-size:.88rem; font-weight:700; color:#e2e8ff; }
+.sp-bar-row { display:flex; align-items:center; gap:8px; margin:4px 0; }
+.sp-bar-lbl { font-size:.7rem; color:rgba(255,255,255,.5); width:60px; flex-shrink:0; }
+.sp-bar-bg { flex:1; height:7px; background:rgba(255,255,255,.08); border-radius:99px; overflow:hidden; }
+.sp-bar-fill { height:100%; border-radius:99px; transition:width 1s ease; }
+.sp-bar-num { font-size:.7rem; color:rgba(255,255,255,.5); width:28px; text-align:right; }
+.sp-badge-row { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+.sp-badge { padding:4px 12px; border-radius:99px; font-size:.68rem; font-weight:700; }
+.sp-badge-gold   { background:rgba(245,158,11,.18); border:1px solid rgba(245,158,11,.35); color:#fbbf24; }
+.sp-badge-purple { background:rgba(168,85,247,.18); border:1px solid rgba(168,85,247,.35); color:#c084fc; }
+.sp-badge-cyan   { background:rgba(6,182,212,.15);  border:1px solid rgba(6,182,212,.3);   color:#22d3ee; }
+.sp-badge-pink   { background:rgba(236,72,153,.15); border:1px solid rgba(236,72,153,.3);  color:#f9a8d4; }
+.sp-badge-green  { background:rgba(16,185,129,.15); border:1px solid rgba(16,185,129,.3);  color:#6ee7b7; }
+.sp-divider { height:1px; background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent); margin:6px 0 12px; }
+.sp-cosmic-ring { display:flex; justify-content:center; margin:12px 0; }
+.sp-rpg-class-badge { display:inline-block; padding:6px 18px; border-radius:12px; font-size:1rem; font-weight:900; letter-spacing:.05em; margin-bottom:10px; }
+.sp-skill-list { list-style:none; padding:0; }
+.sp-skill-list li { padding:5px 0 5px 18px; font-size:.8rem; color:rgba(255,255,255,.7); position:relative; line-height:1.5; }
+.sp-skill-list li::before { content:'✦'; position:absolute; left:0; color:#a855f7; font-size:.7rem; top:7px; }
+.sp-awaken-meter { margin:12px 0; }
+.sp-awaken-lv { text-align:center; font-size:2.2rem; font-weight:900; background:linear-gradient(135deg,#f59e0b,#f97316,#ef4444); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.sp-awaken-lbl { text-align:center; font-size:.72rem; color:rgba(255,255,255,.4); margin-top:2px; margin-bottom:10px; }
+.sp-destiny-type { text-align:center; padding:14px; background:linear-gradient(135deg,rgba(236,72,153,.1),rgba(168,85,247,.1)); border-radius:14px; margin:10px 0; }
+.sp-destiny-emoji { font-size:2.5rem; display:block; margin-bottom:6px; }
+.sp-destiny-name { font-size:1.1rem; font-weight:900; color:#f9a8d4; }
+.sp-shadow-card { background:linear-gradient(135deg,rgba(30,27,75,.6),rgba(15,23,42,.6)); border:1px solid rgba(99,102,241,.25); border-radius:14px; padding:14px; margin:10px 0; }
+.sp-shadow-title { font-size:.75rem; font-weight:700; color:#818cf8; margin-bottom:6px; }
+.sp-shadow-text { font-size:.82rem; color:rgba(255,255,255,.65); line-height:1.6; }
+.sp-planet-row { display:flex; gap:8px; flex-wrap:wrap; margin:8px 0; }
+.sp-planet { text-align:center; padding:8px 12px; background:rgba(255,255,255,.05); border-radius:12px; flex:1; min-width:70px; }
+.sp-planet-emoji { font-size:1.4rem; display:block; }
+.sp-planet-name { font-size:.65rem; color:rgba(255,255,255,.45); }
+.sp-planet-val { font-size:.82rem; font-weight:700; color:#a5b4fc; }
+
+
+/* ======== SAVE IMAGE BUTTON ======== */
+.save-img-btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:calc(100% - 32px);margin:0 16px 14px;
+  padding:14px;border-radius:16px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#a855f7,#6366f1);
+  color:#fff;font-family:inherit;font-size:.92rem;font-weight:800;
+  letter-spacing:.04em;transition:all .25s;
+  box-shadow:0 4px 20px rgba(168,85,247,.4);
+}
+.save-img-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(168,85,247,.55);}
+.save-img-btn:active{transform:scale(.97);}
+.save-img-btn .btn-icon{font-size:1.2rem;}
+
+/* ======== SAVE MODAL ======== */
+.save-modal-overlay{
+  display:none;position:fixed;inset:0;z-index:9000;
+  background:rgba(0,0,0,.75);backdrop-filter:blur(8px);
+  align-items:center;justify-content:center;
+}
+.save-modal-overlay.open{display:flex;}
+.save-modal{
+  background:linear-gradient(160deg,#1a1035 0%,#0d1545 100%);
+  border:1px solid rgba(168,85,247,.3);border-radius:24px;
+  padding:24px 20px;width:calc(100% - 40px);max-width:440px;
+  text-align:center;
+}
+.save-modal-title{font-size:1.05rem;font-weight:900;color:#e8d5ff;margin-bottom:6px;}
+.save-modal-sub{font-size:.75rem;color:rgba(255,255,255,.45);margin-bottom:18px;}
+.save-preview-wrap{
+  border-radius:16px;overflow:hidden;margin-bottom:16px;
+  border:1px solid rgba(255,255,255,.1);
+  background:#080618;
+}
+.save-preview-wrap img{width:100%;display:block;}
+.save-modal-btns{display:flex;gap:10px;}
+.save-modal-dl{
+  flex:1;padding:13px;border-radius:12px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#a855f7,#6366f1);
+  color:#fff;font-family:inherit;font-size:.9rem;font-weight:800;
+}
+.save-modal-cancel{
+  padding:13px 18px;border-radius:12px;border:1px solid rgba(255,255,255,.15);
+  background:transparent;color:rgba(255,255,255,.6);
+  font-family:inherit;font-size:.88rem;cursor:pointer;
+}
+.save-generating{color:rgba(255,255,255,.5);font-size:.8rem;padding:16px;text-align:center;}
+
+/* ======== CARD CANVAS (hidden) ======== */
+#resultCardCanvas{display:none;}
+
+
+/* ======== BUSINESS DIAGNOSIS ADDITIONS ======== */
+.quiz-block{margin:14px 0 0;padding:14px 14px 12px;border-radius:20px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);}
+.quiz-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;}
+.quiz-title{font-size:.88rem;font-weight:800;color:#f3e8ff;line-height:1.5;}
+.quiz-chip{padding:4px 10px;border-radius:999px;background:rgba(168,85,247,.16);border:1px solid rgba(168,85,247,.3);color:#c084fc;font-size:.62rem;font-weight:800;letter-spacing:.08em;flex-shrink:0;}
+.quiz-grid{display:grid;grid-template-columns:1fr;gap:8px;}
+.quiz-opt{display:flex;align-items:flex-start;gap:10px;padding:11px 12px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.74);font-family:inherit;text-align:left;cursor:pointer;transition:all .22s ease;}
+.quiz-opt:hover{border-color:rgba(168,85,247,.28);transform:translateY(-1px);}
+.quiz-opt.on{background:linear-gradient(135deg,rgba(168,85,247,.18),rgba(99,102,241,.12));border-color:rgba(168,85,247,.44);box-shadow:0 8px 24px rgba(99,102,241,.16);color:#fff;}
+.quiz-code{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:.72rem;font-weight:900;background:rgba(255,255,255,.08);color:#fff;flex-shrink:0;margin-top:1px;}
+.quiz-opt.on .quiz-code{background:linear-gradient(135deg,#a855f7,#6366f1);}
+.quiz-copy{font-size:.76rem;line-height:1.55;}
+.detail-stack{display:grid;gap:10px;margin:10px 16px 0;}
+.detail-card{margin:0 !important;}
+.detail-card .reading-body{line-height:1.78;}
+.biz-hero-card{margin:12px 16px 10px;padding:18px 16px;border-radius:24px;background:linear-gradient(135deg,rgba(168,85,247,.16),rgba(99,102,241,.1));border:1px solid rgba(168,85,247,.26);box-shadow:0 14px 40px rgba(59,33,111,.24);}
+.biz-hero-kicker{font-size:.72rem;color:#c4b5fd;letter-spacing:.12em;font-weight:800;margin-bottom:8px;}
+.biz-hero-title{font-size:1.15rem;font-weight:900;line-height:1.55;color:#fff;margin-bottom:10px;}
+.biz-role-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
+.biz-role-chip{padding:7px 12px;border-radius:999px;font-size:.72rem;font-weight:800;border:1px solid transparent;}
+.biz-role-chip.main{background:rgba(236,72,153,.16);border-color:rgba(236,72,153,.34);color:#f9a8d4;}
+.biz-role-chip.sub{background:rgba(34,211,238,.14);border-color:rgba(34,211,238,.3);color:#67e8f9;}
+.biz-role-chip.value{background:rgba(245,158,11,.14);border-color:rgba(245,158,11,.3);color:#fcd34d;}
+.biz-summary{font-size:.84rem;color:rgba(255,255,255,.78);line-height:1.8;}
+.biz-summary strong{color:#fff;}
+.biz-reading{margin:10px 16px 0 !important;}
+.biz-reading .reading-title{font-size:.94rem;}
+.biz-reading .reading-body{line-height:1.82;}
+.biz-checks{display:grid;gap:10px;margin-top:10px;}
+.biz-check{padding:12px 13px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);}
+.biz-check-lbl{font-size:.67rem;color:rgba(255,255,255,.42);font-weight:800;letter-spacing:.08em;margin-bottom:4px;}
+.biz-check-val{font-size:.83rem;color:#fff;line-height:1.75;}
+.honshitsu-spacer{height:90px;}
+
+</style>
+</head>
+<body>
+<div id="stars"></div>
+<div class="toast" id="toast">📋 コピーしました！</div>
+
+<!-- ======== SAVE IMAGE MODAL ======== -->
+<div class="save-modal-overlay" id="saveModalOverlay" onclick="closeSaveModal(event)">
+  <div class="save-modal" onclick="event.stopPropagation()">
+    <div class="save-modal-title">📸 本質結果を画像で保存</div>
+    <div class="save-modal-sub">本質タブの内容を1枚にまとめて保存できます</div>
+    <div class="save-preview-wrap" id="savePreviewWrap">
+      <div class="save-generating">✨ カード生成中...</div>
+    </div>
+    <div class="save-modal-btns">
+      <button class="save-modal-dl" id="saveDownloadBtn" onclick="downloadCard()" disabled>
+        ⬇️ 画像をダウンロード
+      </button>
+      <button class="save-modal-cancel" onclick="closeSaveModal()">閉じる</button>
+    </div>
+  </div>
+</div>
+<canvas id="resultCardCanvas" width="800" height="1200"></canvas>
+
+
+<!-- ========================================================
+     PAGE 1: INPUT
+     ======================================================== -->
+<div id="pg-input" class="page active">
+  <div class="wrap pb80">
+    <div class="input-hero">
+      <div class="badge-row">
+        <span class="badge badge-purple">⭐ 算命学</span>
+        <span class="badge badge-gold">🐯 動物占い</span>
+        <span class="badge badge-cyan">☯ 四柱推命</span>
+      </div>
+      <h1 class="input-title"><span class="title-grad">宇宙三命鑑定</span></h1>
+      <p class="input-sub">四柱推命 × 動物占い × 算命学に加えて<br>直感で答える3問からビジネス戦闘タイプまで診断</p>
+    </div>
+
+    <div class="form-card">
+      <div class="form-row">
+        <label class="form-label">👤 お名前</label>
+        <input id="i-name" class="inp" type="text" placeholder="例：山田 太郎" autocomplete="name">
+      </div>
+      <div class="form-row">
+        <label class="form-label">📅 生年月日</label>
+        <div class="date-grid">
+          <div>
+            <input id="i-y" class="inp" type="number" value="1990" min="1900" max="2010">
+            <div class="date-unit">年</div>
+          </div>
+          <div>
+            <input id="i-m" class="inp" type="number" value="6" min="1" max="12">
+            <div class="date-unit">月</div>
+          </div>
+          <div>
+            <input id="i-d" class="inp" type="number" value="15" min="1" max="31">
+            <div class="date-unit">日</div>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">🕐 生まれた時間 <span style="color:rgba(255,255,255,.3);font-size:.72rem;">（不明なら12:00）</span></label>
+        <div class="time-wrap">
+          <input id="i-h" type="range" min="0" max="23" value="12" oninput="updTime(this.value)">
+          <span class="time-disp" id="hd">12:00</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">性別</label>
+        <div class="sex-grid">
+          <button class="sex-btn on" id="sb-m" onclick="setSex('男')">👨 男性</button>
+          <button class="sex-btn" id="sb-f" onclick="setSex('女')">👩 女性</button>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label class="form-label">🧠 直感で答える3つの質問</label>
+
+        <div class="quiz-block">
+          <div class="quiz-head"><div class="quiz-title">Q1. 新しいプロジェクトが立ち上がった時、最初に意識すること</div><span class="quiz-chip">価値観診断 1/3</span></div>
+          <div class="quiz-grid">
+            <button type="button" class="quiz-opt" data-q="q1" onclick="selectBizAnswer('q1','A',this)"><span class="quiz-code">A</span><span class="quiz-copy">とにかく早く動きたい。ワクワクするし、勝算があるかどうかが大事</span></button>
+            <button type="button" class="quiz-opt" data-q="q1" onclick="selectBizAnswer('q1','B',this)"><span class="quiz-code">B</span><span class="quiz-copy">まずはスケジュールやルール、責任の所在をはっきりさせたい</span></button>
+            <button type="button" class="quiz-opt" data-q="q1" onclick="selectBizAnswer('q1','C',this)"><span class="quiz-code">C</span><span class="quiz-copy">誰と一緒にやるか、チームの雰囲気が良くなるかが一番気になる</span></button>
+            <button type="button" class="quiz-opt" data-q="q1" onclick="selectBizAnswer('q1','D',this)"><span class="quiz-code">D</span><span class="quiz-copy">どんな新しい知識や専門性が得られるか、全体図を把握したい</span></button>
+          </div>
+        </div>
+
+        <div class="quiz-block">
+          <div class="quiz-head"><div class="quiz-title">Q2. チーム内でトラブルが発生した時の対応スタイル</div><span class="quiz-chip">価値観診断 2/3</span></div>
+          <div class="quiz-grid">
+            <button type="button" class="quiz-opt" data-q="q2" onclick="selectBizAnswer('q2','A',this)"><span class="quiz-code">A</span><span class="quiz-copy">即座に現場に向かって、自分の判断でとにかく解決に動く</span></button>
+            <button type="button" class="quiz-opt" data-q="q2" onclick="selectBizAnswer('q2','B',this)"><span class="quiz-code">B</span><span class="quiz-copy">マニュアルや過去のプロセスを確認し、順序立てて確実に対処する</span></button>
+            <button type="button" class="quiz-opt" data-q="q2" onclick="selectBizAnswer('q2','C',this)"><span class="quiz-code">C</span><span class="quiz-copy">まずは関係者の話をじっくり聞いて、メンタル面をフォローする</span></button>
+            <button type="button" class="quiz-opt" data-q="q2" onclick="selectBizAnswer('q2','D',this)"><span class="quiz-code">D</span><span class="quiz-copy">なぜ起きたのか原因を論理的に分析し、根本解決を探る</span></button>
+          </div>
+        </div>
+
+        <div class="quiz-block">
+          <div class="quiz-head"><div class="quiz-title">Q3. 仕事で一番やりがいを感じる瞬間</div><span class="quiz-chip">価値観診断 3/3</span></div>
+          <div class="quiz-grid">
+            <button type="button" class="quiz-opt" data-q="q3" onclick="selectBizAnswer('q3','A',this)"><span class="quiz-code">A</span><span class="quiz-copy">大きな目標を達成して、勝利を勝ち取ったとき</span></button>
+            <button type="button" class="quiz-opt" data-q="q3" onclick="selectBizAnswer('q3','B',this)"><span class="quiz-code">B</span><span class="quiz-copy">仕組みが予定通りに機能し、安定して結果が出続けたとき</span></button>
+            <button type="button" class="quiz-opt" data-q="q3" onclick="selectBizAnswer('q3','C',this)"><span class="quiz-code">C</span><span class="quiz-copy">自分のサポートで人が成長し、ありがとうと言われたとき</span></button>
+            <button type="button" class="quiz-opt" data-q="q3" onclick="selectBizAnswer('q3','D',this)"><span class="quiz-code">D</span><span class="quiz-copy">複雑な問題を解き明かし、自分の専門スキルが向上したと実感したとき</span></button>
+          </div>
+        </div>
+      </div>
+      <div class="err" id="err"></div>
+      <button class="start-btn" onclick="startFortune()">✨ 今すぐ無料で鑑定する</button>
+      <p class="input-note">※ 娯楽・参考目的のWebアプリです</p>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================
+     PAGE 2: LOADING
+     ======================================================== -->
+<div id="pg-loading" class="page">
+  <div class="loading-inner">
+    <div class="orb-wrap">
+      <div class="orb-ring2"></div>
+      <div class="orb-ring"></div>
+      <div class="orb-core"></div>
+    </div>
+    <div class="loading-title">命式を解析中…</div>
+    <div class="loading-sub" id="l-name">宇宙の法則があなたの宿命を読み解いています</div>
+    <div class="steps">
+      <div class="step" id="ls1"><div class="step-dot"></div>四柱推命 — 四柱命式算出</div>
+      <div class="step" id="ls2"><div class="step-dot"></div>動物占い — キャラクター判定</div>
+      <div class="step" id="ls3"><div class="step-dot"></div>算命学 — 十大主星 & 十二従星</div>
+      <div class="step" id="ls4"><div class="step-dot"></div>価値観分析 — A/B/C/Dの強み判定</div>
+      <div class="step" id="ls5"><div class="step-dot"></div>役割決定 — ビジネス戦闘タイプ生成</div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================
+     PAGE 3: RESULT
+     ======================================================== -->
+<div id="pg-result" class="page">
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-inner">
+      <button class="topbar-back" onclick="showPage('input')">← 戻る</button>
+      <span class="topbar-title" id="r-nav-ttl">鑑定結果</span>
+      <button class="topbar-share" onclick="openSaveModal()">📸 画像で保存</button>
+    </div>
+  </div>
+
+  <!-- BOTTOM TABS -->
+  <div class="btabs">
+    <div class="btabs-inner">
+      <button class="btab on" id="bt-honshitsu" onclick="switchTab('honshitsu')"><span class="btab-icon">📊</span>本質</button>
+      <button class="btab" id="bt-uranai" onclick="switchTab('uranai')"><span class="btab-icon">📅</span>運勢</button>
+      <button class="btab" id="bt-love" onclick="switchTab('love')"><span class="btab-icon">💕</span>恋愛</button>
+      <button class="btab" id="bt-work" onclick="switchTab('work')"><span class="btab-icon">💼</span>仕事</button>
+      <button class="btab" id="bt-compat" onclick="switchTab('compat')"><span class="btab-icon">🤝</span>相性</button>    </div>
+  </div>
+
+  <!-- ===== PANEL: 本質 ===== -->
+  <div id="pnl-honshitsu" class="panel on panel-scroll">
+    <!-- Hero Card -->
+    <div class="hero-card">
+      <div class="hero-bg" id="r-hero-bg">
+        <div class="hero-badge-line"><span class="hero-b" id="r-sansei-b">⭐ 算命学</span></div>
+        <span class="hero-emoji" id="r-emoji">🐯</span>
+        <div class="hero-name" id="r-animal">虎</div>
+        <div class="hero-type" id="r-type">社交家</div>
+        <div class="hero-pillar" id="r-pillar">日柱 辛巳</div>
+      </div>
+      <div class="shogo">
+        <div class="shogo-lbl">✦ あなたの称号 ✦</div>
+        <div class="shogo-val" id="r-shogo">金の魂を持つ社交の虎</div>
+      </div>
+    </div>
+
+    <!-- 3層バッジ -->
+    <div class="triple">
+      <div class="triple-c">
+        <div class="tc-icon">⭐</div>
+        <div class="tc-lbl">算命学 主星</div>
+        <div class="tc-val" id="r-shusei">龍高星</div>
+        <div class="tc-sub" id="r-shusei-sub">探求・変革</div>
+      </div>
+      <div class="triple-c">
+        <div class="tc-icon" id="r-tc-emoji">🐯</div>
+        <div class="tc-lbl">動物キャラ</div>
+        <div class="tc-val" id="r-tc-ani">虎</div>
+        <div class="tc-sub" id="r-tc-type">社交家</div>
+      </div>
+      <div class="triple-c">
+        <div class="tc-icon">☯</div>
+        <div class="tc-lbl">日干五行</div>
+        <div class="tc-val" id="r-tc-gogyo">金</div>
+        <div class="tc-sub" id="r-tc-gogyo-sub">完璧・洗練</div>
+      </div>
+    </div>
+
+    <div class="detail-stack">
+      <div class="reading detail-card" id="detail-shusei"></div>
+      <div class="reading detail-card" id="detail-animal"></div>
+      <div class="reading detail-card" id="detail-gogyo"></div>
+    </div>
+
+    <div class="radar-card">
+      <div class="sec-hd">本質グラフ（5軸）</div>
+      <div class="radar-canvas-wrap">
+        <canvas id="radarCanvas" width="240" height="240" style="max-width:240px;"></canvas>
+      </div>
+      <div class="radar-vals" id="radar-vals"></div>
+    </div>
+
+    <div class="biz-hero-card" id="r-biztype-card"></div>
+    <div class="reading biz-reading" id="r-birth-base-card"></div>
+    <div class="reading biz-reading" id="r-value-card"></div>
+    <div class="reading biz-reading" id="r-team-role-card"></div>
+    <div class="reading biz-reading" id="r-action-card"></div>
+    <div class="honshitsu-spacer"></div>
+
+  </div><!-- /pnl-honshitsu -->
+
+
+  <!-- ===== PANEL: 運勢 ===== -->
+  <div id="pnl-uranai" class="panel panel-scroll">
+    <div style="padding-top:14px;">
+      <div class="ft-tabs">
+        <button class="ft-tab on" id="ft-today" onclick="switchFt('today')">今日の運勢</button>
+        <button class="ft-tab" id="ft-month" onclick="switchFt('month')">今月の運勢</button>
+        <button class="ft-tab" id="ft-year" onclick="switchFt('year')">今年の運勢</button>
+      </div>
+      <div class="ft-panel on" id="ftp-today"><div class="fc" id="fc-today"></div></div>
+      <div class="ft-panel" id="ftp-month"><div class="fc" id="fc-month"></div></div>
+      <div class="ft-panel" id="ftp-year"><div class="fc" id="fc-year"></div></div>
+      <div class="reading" id="r-uranai-adv" style="margin:0 16px 12px;"></div>
+    </div>
+  </div>
+
+  <!-- ===== PANEL: 恋愛 ===== -->
+  <div id="pnl-love" class="panel panel-scroll">
+    <div id="love-inner" style="padding-top:14px;"></div>
+  </div>
+
+  <!-- ===== PANEL: 仕事 ===== -->
+  <div id="pnl-work" class="panel panel-scroll">
+    <div id="work-inner" style="padding-top:14px;"></div>
+  </div>
+
+  <!-- ===== PANEL: 相性 ===== -->
+  <div id="pnl-compat" class="panel panel-scroll">
+    <div style="padding-top:14px;">
+      <div class="compat-form">
+        <div class="compat-lbl">👤 あなた</div>
+        <div class="compat-me-row">
+          <div class="cm-emoji" id="my-emoji2">🐯</div>
+          <div class="cm-info">
+            <div class="cm-name" id="my-name2">---</div>
+            <div class="cm-sub" id="my-sub2">---</div>
+          </div>
+        </div>
+        <div class="compat-lbl">💕 お相手の情報</div>
+        <input id="c-name" class="inp" type="text" placeholder="お相手のお名前" style="margin-bottom:10px;">
+        <div class="date-grid" style="margin-bottom:10px;">
+          <div><input id="c-y" class="inp" type="number" value="1992"><div class="date-unit">年</div></div>
+          <div><input id="c-m" class="inp" type="number" value="8" min="1" max="12"><div class="date-unit">月</div></div>
+          <div><input id="c-d" class="inp" type="number" value="20" min="1" max="31"><div class="date-unit">日</div></div>
+        </div>
+        <button class="compat-diag-btn" onclick="doCompat()">💕 相性を鑑定する</button>
+      </div>
+      <div class="compat-result-wrap" id="compat-result"></div>
+    </div>
+  </div>
+
+</div><!-- /pg-result -->
+
+<script>
+// ============================================================
+// CONSTANTS
+// ============================================================
+const KAN=['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+const SHI=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+const GOGYO={甲:'木',乙:'木',丙:'火',丁:'火',戊:'土',己:'土',庚:'金',辛:'金',壬:'水',癸:'水'};
+const GCOL={木:'#22c55e',火:'#ef4444',土:'#f59e0b',金:'#9ca3af',水:'#3b82f6'};
+const GEMO={木:'🌿',火:'🔥',土:'🪨',金:'⚙️',水:'💧'};
+const JUUN=['長生','沐浴','冠帯','建禄','帝旺','衰','病','死','墓','絶','胎','養'];
+const TSUHEN={
+  甲:['比肩','劫財','食神','傷官','偏財','正財','七殺','正官','偏印','印綬'],
+  乙:['劫財','比肩','傷官','食神','正財','偏財','正官','七殺','印綬','偏印'],
+  丙:['偏印','印綬','比肩','劫財','食神','傷官','偏財','正財','七殺','正官'],
+  丁:['印綬','偏印','劫財','比肩','傷官','食神','正財','偏財','正官','七殺'],
+  戊:['七殺','正官','偏印','印綬','比肩','劫財','食神','傷官','偏財','正財'],
+  己:['正官','七殺','印綬','偏印','劫財','比肩','傷官','食神','正財','偏財'],
+  庚:['偏財','正財','七殺','正官','偏印','印綬','比肩','劫財','食神','傷官'],
+  辛:['正財','偏財','正官','七殺','印綬','偏印','劫財','比肩','傷官','食神'],
+  壬:['食神','傷官','偏財','正財','七殺','正官','偏印','印綬','比肩','劫財'],
+  癸:['傷官','食神','正財','偏財','正官','七殺','印綬','偏印','劫財','比肩'],
+};
+
+// 算命学 十大主星テーブル
+const SHUSEI_TBL={
+  甲:{甲:'比肩',乙:'劫財',丙:'食神',丁:'傷官',戊:'偏財',己:'正財',庚:'七殺',辛:'正官',壬:'偏印',癸:'印綬'},
+  乙:{甲:'劫財',乙:'比肩',丙:'傷官',丁:'食神',戊:'正財',己:'偏財',庚:'正官',辛:'七殺',壬:'印綬',癸:'偏印'},
+  丙:{甲:'偏印',乙:'印綬',丙:'比肩',丁:'劫財',戊:'食神',己:'傷官',庚:'偏財',辛:'正財',壬:'七殺',癸:'正官'},
+  丁:{甲:'印綬',乙:'偏印',丙:'劫財',丁:'比肩',戊:'傷官',己:'食神',庚:'正財',辛:'偏財',壬:'正官',癸:'七殺'},
+  戊:{甲:'七殺',乙:'正官',丙:'偏印',丁:'印綬',戊:'比肩',己:'劫財',庚:'食神',辛:'傷官',壬:'偏財',癸:'正財'},
+  己:{甲:'正官',乙:'七殺',丙:'印綬',丁:'偏印',戊:'劫財',己:'比肩',庚:'傷官',辛:'食神',壬:'正財',癸:'偏財'},
+  庚:{甲:'偏財',乙:'正財',丙:'七殺',丁:'正官',戊:'偏印',己:'印綬',庚:'比肩',辛:'劫財',壬:'食神',癸:'傷官'},
+  辛:{甲:'正財',乙:'偏財',丙:'正官',丁:'七殺',戊:'印綬',己:'偏印',庚:'劫財',辛:'比肩',壬:'傷官',癸:'食神'},
+  壬:{甲:'食神',乙:'傷官',丙:'偏財',丁:'正財',戊:'七殺',己:'正官',庚:'偏印',辛:'印綬',壬:'比肩',癸:'劫財'},
+  癸:{甲:'傷官',乙:'食神',丙:'正財',丁:'偏財',戊:'正官',己:'七殺',庚:'印綬',辛:'偏印',壬:'劫財',癸:'比肩'},
+};
+
+// 算命学 十大主星 詳細
+const SHUSEI_INFO={
+  '比肩':{name:'貫索星',emoji:'🔵',short:'独立・開拓',trait:'独立心旺盛で自分の信念を貫く力を持ちます。開拓精神が強く、新しい道を切り開く才能があります。',talent:'独立業・起業・開拓職・フリーランス',weakness:'頑固さ・協調性の欠如',color:'#3b82f6'},
+  '劫財':{name:'石門星',emoji:'🟢',short:'人脈・調和',trait:'人と人を結びつける天性の調和力を持ちます。人脈を活かしてチームをまとめる才能があります。',talent:'外交・ネットワーキング・チームリーダー',weakness:'依存心・優柔不断',color:'#22c55e'},
+  '食神':{name:'鳳閣星',emoji:'🟡',short:'創造・自由',trait:'自由と創造を愛する楽観主義者。芸術的センスと表現力で周囲を魅了します。',talent:'芸術・表現・クリエイター・飲食業',weakness:'怠惰・浪費癖',color:'#f59e0b'},
+  '傷官':{name:'調舒星',emoji:'⭐',short:'感受性・完璧主義',trait:'高い感受性と鋭い批判眼を持つ完璧主義者。芸術や技術の分野で突出した才能を発揮します。',talent:'芸術・音楽・技術・批評・研究',weakness:'傲慢さ・孤独感',color:'#f59e0b'},
+  '偏財':{name:'禄存星',emoji:'🟠',short:'社交・商才',trait:'社交上手でお金を動かす商才があります。人との縁を活かして大きな成功を掴む力を持ちます。',talent:'商業・投資・営業・社交業',weakness:'散財・色恋沙汰',color:'#f97316'},
+  '正財':{name:'司禄星',emoji:'💰',short:'堅実・蓄財',trait:'堅実で地道な努力家。着実に財を積み上げ、安定した生活基盤を築く力を持ちます。',talent:'財務・経理・管理職・着実な蓄財',weakness:'けち・融通が利かない',color:'#10b981'},
+  '七殺':{name:'車騎星',emoji:'⚔️',short:'行動力・突破力',trait:'強烈な行動力と勝負強さで逆境を突破します。スポーツ・競争の場で類まれな力を発揮します。',talent:'スポーツ・競技・開拓・武道',weakness:'短気・暴走',color:'#ef4444'},
+  '正官':{name:'牽牛星',emoji:'👑',short:'名誉・社会的地位',trait:'名誉とプライドを重んじ、社会的地位を築く力を持ちます。責任感が強く、組織のリーダーに向いています。',talent:'官職・管理職・名誉職・公務員',weakness:'見栄・硬直思考',color:'#8b5cf6'},
+  '偏印':{name:'龍高星',emoji:'🔮',short:'神秘・探求',trait:'神秘的な探求心と異才を持ちます。霊感や直感が鋭く、常識にとらわれない発想で革新をもたらします。',talent:'研究・芸術・宗教・占い・哲学',weakness:'気まぐれ・現実逃避',color:'#a855f7'},
+  '印綬':{name:'玉堂星',emoji:'📚',short:'学問・知性',trait:'学問と伝統を重んじる知性の星。深い知識と格式ある姿勢で、教育・学術分野で才能を発揮します。',talent:'教育・学術・伝統芸能・出版',weakness:'権威主義・保守的',color:'#06b6d4'},
+};
+
+// 動物60キャラ
+const ROJU=['甲子','乙丑','丙寅','丁卯','戊辰','己巳','庚午','辛未','壬申','癸酉','甲戌','乙亥',
+  '丙子','丁丑','戊寅','己卯','庚辰','辛巳','壬午','癸未','甲申','乙酉','丙戌','丁亥',
+  '戊子','己丑','庚寅','辛卯','壬辰','癸巳','甲午','乙未','丙申','丁酉','戊戌','己亥',
+  '庚子','辛丑','壬寅','癸卯','甲辰','乙巳','丙午','丁未','戊申','己酉','庚戌','辛亥',
+  '壬子','癸丑','甲寅','乙卯','丙辰','丁巳','戊午','己未','庚申','辛酉','壬戌','癸亥'];
+const ANI=[
+  {a:'チーター',e:'🐆',bg:'linear-gradient(150deg,#f59e0b,#ef4444)',desc:'速さと直感で勝負する行動派'},
+  {a:'たぬき',  e:'🦝',bg:'linear-gradient(150deg,#8b5cf6,#6366f1)',desc:'変化自在の適応力と愛嬌の持ち主'},
+  {a:'こじか',  e:'🦌',bg:'linear-gradient(150deg,#10b981,#0891b2)',desc:'純粋で繊細な感受性の持ち主'},
+  {a:'コアラ',  e:'🐨',bg:'linear-gradient(150deg,#6b7280,#374151)',desc:'マイペースで独自の世界観を持つ'},
+  {a:'黒ひょう',e:'🐾',bg:'linear-gradient(150deg,#374151,#111827)',desc:'神秘的なオーラと鋭い洞察力'},
+  {a:'虎',      e:'🐯',bg:'linear-gradient(150deg,#f97316,#dc2626)',desc:'情熱と勇気あふれる天性のリーダー'},
+  {a:'ひつじ',  e:'🐑',bg:'linear-gradient(150deg,#60a5fa,#6366f1)',desc:'思いやりと協調性に溢れる癒し系'},
+  {a:'狼',      e:'🐺',bg:'linear-gradient(150deg,#9ca3af,#4b5563)',desc:'仲間への忠誠心と鋭い野性感覚'},
+  {a:'猿',      e:'🐵',bg:'linear-gradient(150deg,#fbbf24,#d97706)',desc:'頭脳明晰で好奇心旺盛な知恵者'},
+  {a:'ゾウ',    e:'🐘',bg:'linear-gradient(150deg,#a78bfa,#7c3aed)',desc:'記憶力抜群で深い絆を大切にする'},
+  {a:'ライオン',e:'🦁',bg:'linear-gradient(150deg,#f87171,#b91c1c)',desc:'カリスマ的な存在感と高い誇り'},
+  {a:'ペガサス',e:'🦄',bg:'linear-gradient(150deg,#f9a8d4,#db2777)',desc:'夢とロマンを追い続ける理想主義者'},
+];
+const TYPES=[
+  {t:'長距離ランナー',p:'目標へひたすら走り続ける努力家。粘り強く、一度決めたことは必ずやり遂げる'},
+  {t:'社交家',        p:'どんな場でも打ち解けられる天性の社交術の持ち主。人脈を活かして成長する'},
+  {t:'正直者',        p:'嘘をつけない純粋な心の持ち主。その誠実さが周囲から絶大な信頼を集める'},
+  {t:'フットワーク軽',p:'好奇心旺盛で新しいことに次々と挑戦する行動派。変化を楽しむ天才'},
+  {t:'情熱家',        p:'心に秘めた情熱を持ち、一度信頼した人への忠誠心は格別。愛情深い存在'},
+];
+
+// 称号テーブル
+const SHOGO_GO={木:'緑の命を宿す',火:'情熱の炎を持つ',土:'大地の力を秘めた',金:'金の魂を持つ',水:'深海の知恵を持つ'};
+const SHOGO_TY={長距離ランナー:'孤高の',社交家:'社交の',正直者:'誠実の',フットワーク軽:'疾風の',情熱家:'情熱の'};
+
+// ============================================================
+// CALCULATION ENGINE
+// ============================================================
+function jd(y,m,d){const a=Math.floor((14-m)/12),yy=y+4800-a,mm=m+12*a-3;return d+Math.floor((153*mm+2)/5)+365*yy+Math.floor(yy/4)-Math.floor(yy/100)+Math.floor(yy/400)-32045;}
+function dayP(y,m,d){const diff=jd(y,m,d)-jd(1900,1,1);const ki=((diff%10)+10)%10,si=((diff%12)+4+12)%12;return{kan:KAN[ki],shi:SHI[si],ki,si};}
+function yearP(y,m,d){let yr=y;if(m<2||(m===2&&d<4))yr--;const ki=((yr-4)%10+10)%10,si=((yr-4)%12+12)%12;return{kan:KAN[ki],shi:SHI[si],ki,si};}
+function monthP(y,m,d){const SK=[6,4,6,5,6,6,7,8,8,8,7,7],MS=[2,3,4,5,6,7,8,9,10,11,0,1];let mi=m-1;if(d<SK[mi]){mi--;if(mi<0)mi=11;}const yp=yearP(y,m,d),st=[2,4,6,8,0],ki=(st[yp.ki%5]+mi)%10;return{kan:KAN[ki],shi:SHI[MS[mi]],ki,si:MS[mi]};}
+function hourP(h,dki){const si=Math.floor(((h+1)%24)/2),ki=([0,2,4,6,8][dki%5]+si)%10;return{kan:KAN[ki],shi:SHI[si],ki,si};}
+function shiGogyo(s){return({子:['水'],丑:['土','水','金'],寅:['木','火','土'],卯:['木'],辰:['土','木','水'],巳:['火','土','金'],午:['火','土'],未:['土','火','木'],申:['金','水','土'],酉:['金'],戌:['土','火','金'],亥:['水','木']})[s]||[];}
+function calcGogyo(ps){const b={木:0,火:0,土:0,金:0,水:0};[ps.year,ps.month,ps.day,ps.hour].forEach(p=>{b[GOGYO[p.kan]]+=2;shiGogyo(p.shi).forEach(g=>b[g]++);});return b;}
+function juunsei(dk,s){const ts={甲:11,乙:6,丙:6,丁:11,戊:6,己:11,庚:2,辛:9,壬:2,癸:9},dir={甲:1,乙:-1,丙:1,丁:-1,戊:1,己:-1,庚:1,辛:-1,壬:1,癸:-1};return JUUN[(((SHI.indexOf(s)-ts[dk])*dir[dk])+120)%12];}
+function tsuh(dk,k){return(TSUHEN[dk]||[])[KAN.indexOf(k)]||'';}
+function kkIdx(ki,si){for(let i=0;i<60;i++)if(i%10===ki&&i%12===si)return i;return 0;}
+function getAni(ki,si){const idx=kkIdx(ki,si),a=ANI[idx%12],t=TYPES[Math.floor(idx/12)];return{idx,ks:ROJU[idx],animal:a.a,emoji:a.e,bg:a.bg,type:t.t,personality:t.p,desc:a.desc};}
+
+// 算命学 主星
+function calcShusei(dk,mk){return SHUSEI_TBL[dk]?.[mk]||'比肩';}
+function calcJusei(dk,tk){return SHUSEI_TBL[dk]?.[tk]||'比肩';}
+
+// 本質レーダー（5軸）
+function calcRadar(ps,gogyo,main,shusei){
+  const g=gogyo;const total=Object.values(g).reduce((a,b)=>a+b,0)||1;
+  const sainou=Math.round(((g['金']||0)*3+(g['木']||0)*2)/total*100);
+  const kanjou=Math.round(((g['火']||0)*3+(g['水']||0)*2)/total*100);
+  const sMap={'劫財':90,'食神':85,'傷官':80,'偏財':88,'正財':70,'七殺':75,'正官':72,'偏印':82,'印綬':68,'比肩':76};
+  const shakou=Math.min(100,(sMap[shusei]||70)+Math.floor(Math.random()*8));
+  const ishi=Math.round(((g['土']||0)*3+(g['金']||0)*2)/total*100);
+  const chokkann=Math.round(((g['水']||0)*3+(g['木']||0)*2)/total*100);
+  const norm=v=>Math.min(95,Math.max(30,Math.round(v*.6+35)));
+  return[norm(sainou),norm(kanjou),norm(shakou),norm(ishi),norm(chokkann)];
+}
+
+// 運勢スコア
+const S10={木:'火',火:'土',土:'金',金:'水',水:'木'};
+const K10={木:'土',土:'水',水:'火',火:'金',金:'木'};
+function calcFortune(date,ps){
+  const d=date||new Date();
+  const seed=d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();
+  const base=ps.day.ki;
+  const dg=GOGYO[ps.day.kan];
+  const tdp=dayP(d.getFullYear(),d.getMonth()+1,d.getDate());
+  const yg=GOGYO[tdp.kan];
+  let tb=65;
+  if(S10[dg]===yg)tb=85;else if(S10[yg]===dg)tb=78;else if(K10[dg]===yg)tb=48;else if(dg===yg)tb=90;
+  const day=Math.min(98,Math.max(30,tb+((seed*17+base*7)%20)-10));
+  const mp=monthP(d.getFullYear(),d.getMonth()+1,15);const mg=GOGYO[mp.kan];
+  let mb=65;if(S10[dg]===mg)mb=82;else if(S10[mg]===dg)mb=75;else if(K10[dg]===mg)mb=50;
+  const month=Math.min(95,Math.max(35,mb+((seed*13+base*5)%16)-8));
+  const yp=yearP(d.getFullYear(),6,15);const yrg=GOGYO[yp.kan];
+  let yb=65;if(S10[dg]===yrg)yb=80;else if(S10[yrg]===dg)yb=73;else if(K10[dg]===yrg)yb=52;
+  const year=Math.min(92,Math.max(38,yb+((seed*11+base*3)%14)-7));
+  return{day,month,year};
+}
+
+const FW=[
+  {min:85,word:'大吉',emoji:'🌟',color:'#f59e0b',bg:'linear-gradient(135deg,rgba(245,158,11,.18),rgba(251,191,36,.08))'},
+  {min:73,word:'吉',  emoji:'✨',color:'#a855f7',bg:'linear-gradient(135deg,rgba(168,85,247,.18),rgba(139,92,246,.08))'},
+  {min:60,word:'中吉',emoji:'🌙',color:'#6366f1',bg:'linear-gradient(135deg,rgba(99,102,241,.18),rgba(79,70,229,.08))'},
+  {min:45,word:'小吉',emoji:'⭐',color:'#06b6d4',bg:'linear-gradient(135deg,rgba(6,182,212,.18),rgba(14,165,233,.08))'},
+  {min:0, word:'注意',emoji:'🌫',color:'#6b7280',bg:'linear-gradient(135deg,rgba(107,114,128,.18),rgba(75,85,99,.08))'},
+];
+function getFW(s){return FW.find(f=>s>=f.min)||FW[FW.length-1];}
+
+const LUCKY_ITEMS={
+  color:{木:'グリーン',火:'赤・オレンジ',土:'イエロー・アース',金:'ホワイト・シルバー',水:'ブルー・ネイビー'},
+  num:  {木:3,火:9,土:5,金:8,水:1},
+  dir:  {木:'東',火:'南',土:'中央',金:'西',水:'北'},
+  food: {木:'野菜・豆類',火:'スパイス・辛い料理',土:'根菜・穀物',金:'白い食べ物・乳製品',水:'魚・海藻・麺類'},
+};
+
+// ============================================================
+// UI STATE
+// ============================================================
+let curSex='男', myData=null, curBizAnswers={q1:'',q2:'',q3:''};
+
+function updTime(v){document.getElementById('hd').textContent=String(v).padStart(2,'0')+':00';}
+function setSex(s){
+  curSex=s;
+  document.getElementById('sb-m').className='sex-btn'+(s==='男'?' on':'');
+  document.getElementById('sb-f').className='sex-btn'+(s==='女'?' on':'');
+}
+function showPage(p){
+  document.querySelectorAll('.page').forEach(e=>{e.classList.remove('active');e.style.display='none';});
+  const el=document.getElementById('pg-'+p);
+  el.style.display='block';
+  requestAnimationFrame(()=>{requestAnimationFrame(()=>{el.classList.add('active');});});
+  window.scrollTo(0,0);
+}
+function switchTab(tab){
+  document.querySelectorAll('.panel').forEach(e=>e.classList.remove('on'));
+  document.querySelectorAll('.btab').forEach(e=>e.classList.remove('on'));
+  document.getElementById('pnl-'+tab).classList.add('on');
+  document.getElementById('bt-'+tab).classList.add('on');
+  window.scrollTo(0,0);
+}
+function switchFt(ft){
+  ['today','month','year'].forEach(k=>{
+    document.getElementById('ft-'+k).classList.toggle('on',k===ft);
+    document.getElementById('ftp-'+k).classList.toggle('on',k===ft);
+  });
+}
+
+// ============================================================
+// STARS
+// ============================================================
+(()=>{
+  const c=document.getElementById('stars');
+  for(let i=0;i<90;i++){
+    const s=document.createElement('div');
+    const sz=Math.random()*2+.5;
+    s.className='star';
+    s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--dur:${(Math.random()*2.5+2).toFixed(1)}s;--del:${(Math.random()*5).toFixed(1)}s;opacity:${(Math.random()*.5+.1).toFixed(2)}`;
+    c.appendChild(s);
+  }
+})();
+
+
+const VALUE_META={
+  A:{name:'行動・自由',short:'スピードで突破する',desc:'まず動く・挑戦する・勝ち筋をつかむことに価値を感じやすいタイプです。'},
+  B:{name:'安定・ルール',short:'仕組みで勝つ',desc:'再現性・責任・土台づくりを重視し、安定した成果を積み上げるタイプです。'},
+  C:{name:'人間関係・貢献',short:'信頼で勝つ',desc:'人の感情やチームの空気を読み、貢献や信頼の蓄積で成果を生むタイプです。'},
+  D:{name:'学習・専門性',short:'知性で勝つ',desc:'学び・分析・専門性の高さで勝負し、複雑な問題を整理できるタイプです。'},
+};
+
+
+const SHEET_WEBAPP_URL='https://script.google.com/macros/s/AKfycbzmLXeqND8khFKYOlTlhGNucKplfVkFBS7W1Y3mCZHfFJ6zLwXxA2b2e4LELllrZfH-/exec';
+const BIZ_QUESTION_TEXT={
+  q1:{
+    A:'とにかく早く動きたい。ワクワクするし、勝算があるかどうかが大事',
+    B:'まずはスケジュールやルール、責任の所在をはっきりさせたい',
+    C:'誰と一緒にやるか、チームの雰囲気が良くなるかが一番気になる',
+    D:'どんな新しい知識や専門性が得られるか、全体図を把握したい'
+  },
+  q2:{
+    A:'即座に現場に向かって、自分の判断でとにかく解決に動く',
+    B:'マニュアルや過去のプロセスを確認し、順序立てて確実に対処する',
+    C:'まずは関係者の話をじっくり聞いて、メンタル面をフォローする',
+    D:'なぜ起きたのか原因を論理的に分析し、根本解決を探る'
+  },
+  q3:{
+    A:'大きな目標を達成して、勝利を勝ち取ったとき',
+    B:'仕組みが予定通りに機能し、安定して結果が出続けたとき',
+    C:'自分のサポートで人が成長し、ありがとうと言われたとき',
+    D:'複雑な問題を解き明かし、自分の専門スキルが向上したと実感したとき'
+  }
+};
+
+function getAnswerTexts(ans){
+  return {
+    q1:BIZ_QUESTION_TEXT.q1[ans.q1]||'',
+    q2:BIZ_QUESTION_TEXT.q2[ans.q2]||'',
+    q3:BIZ_QUESTION_TEXT.q3[ans.q3]||''
+  };
+}
+
+function saveLeadToSheet(){
+  if(!myData || !myData.biz) return;
+  if(myData._sheetSaved) return;
+  if(!SHEET_WEBAPP_URL || SHEET_WEBAPP_URL.includes('YOUR_DEPLOYMENT_ID')) return;
+  const a=myData.answerTexts||getAnswerTexts(myData.answers||{});
+  const body=new URLSearchParams({
+    name:myData.name||'',
+    birthdate:`${myData.y}-${String(myData.m).padStart(2,'0')}-${String(myData.d).padStart(2,'0')}`,
+    gender:myData.sex||'',
+    q1_code:myData.answers?.q1||'',
+    q1_text:a.q1||'',
+    q2_code:myData.answers?.q2||'',
+    q2_text:a.q2||'',
+    q3_code:myData.answers?.q3||'',
+    q3_text:a.q3||'',
+    dominant_value:myData.biz.dominant||'',
+    dominant_value_name:VALUE_META[myData.biz.dominant]?.name||'',
+    secondary_value:myData.biz.secondaryValue||'',
+    secondary_value_name:VALUE_META[myData.biz.secondaryValue]?.name||'',
+    primary_role:myData.biz.primary?`${myData.biz.primary.id}${myData.biz.primary.name}`:'',
+    secondary_role:myData.biz.secondary?`${myData.biz.secondary.id}${myData.biz.secondary.name}`:'',
+    headline:myData.biz.headline||'',
+    animal:myData.main?.animal||'',
+    shusei:myData.shuseiInfo?.name||'',
+    gogyo:myData.dg||''
+  });
+  fetch(SHEET_WEBAPP_URL,{
+    method:'POST',
+    mode:'no-cors',
+    headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
+    body:body.toString()
+  }).then(()=>{myData._sheetSaved=true;}).catch(()=>{});
+}
+
+const BIZ_ROLES=[
+  {id:'①',name:'フロントマン',emoji:'🎤',desc:'先頭に立ち、第一印象と空気をつかんで場を動かす前線タイプ。',fit:'新規開拓・初回接点・前線での惹きつけ役に強い。',weights:{A:4,B:0,C:2,D:0},shusei:['七殺','比肩','劫財'],gogyo:['火','木'],animals:['チーター','虎','黒ひょう'],types:['フットワーク軽','情熱家'],life:[1,5,9]},
+  {id:'②',name:'プレゼンター',emoji:'🗣️',desc:'魅力や価値をわかりやすく伝え、納得感を作る表現タイプ。',fit:'説明会・提案・セミナー・フロントでの訴求に強い。',weights:{A:1,B:0,C:3,D:3},shusei:['食神','傷官','偏印'],gogyo:['火','水','木'],animals:['ペガサス','猿','たぬき'],types:['社交家','フットワーク軽'],life:[3,7]},
+  {id:'③',name:'クローザー',emoji:'🤝',desc:'相手の迷いをほどき、最後の決断を後押しする成約タイプ。',fit:'商談・面談・高単価提案・クロージングに強い。',weights:{A:1,B:1,C:4,D:0},shusei:['偏財','正財','食神','劫財'],gogyo:['土','金'],animals:['虎','ひつじ','たぬき'],types:['社交家','情熱家'],life:[2,6,8]},
+  {id:'④',name:'教育トレーナー',emoji:'📚',desc:'知識を体系立てて伝え、人を育てながら成果へ導く育成タイプ。',fit:'研修・オンボーディング・講座設計・伴走支援に強い。',weights:{A:0,B:2,C:3,D:3},shusei:['印綬','玉堂星','龍高星','正財'],gogyo:['水','土'],animals:['ひつじ','こじか','ゾウ'],types:['正直者','情熱家'],life:[2,6]},
+  {id:'⑤',name:'ムードメーカー',emoji:'🎉',desc:'場の雰囲気を明るく整え、チームの温度を上げる潤滑タイプ。',fit:'コミュニティ運営・接客・チーム活性・イベントに強い。',weights:{A:1,B:0,C:4,D:1},shusei:['禄存星','鳳閣星','食神'],gogyo:['火','土'],animals:['ひつじ','たぬき','猿'],types:['社交家','情熱家'],life:[3,6]},
+  {id:'⑥',name:'モチベーター',emoji:'🔥',desc:'人の心に火をつけ、行動を引き出す推進タイプ。',fit:'営業推進・コーチング・朝会・チーム鼓舞に強い。',weights:{A:2,B:0,C:4,D:1},shusei:['七殺','禄存星','偏財'],gogyo:['火','木'],animals:['ライオン','虎','たぬき'],types:['情熱家','社交家'],life:[1,5,8]},
+  {id:'⑦',name:'ストーリーテラー',emoji:'🎙️',desc:'体験や感情を物語に変え、人の心を動かす発信タイプ。',fit:'発信・SNS・セミナー・コンテンツ販売に強い。',weights:{A:1,B:0,C:3,D:3},shusei:['鳳閣星','調舒星','偏印'],gogyo:['火','水','木'],animals:['ペガサス','猿','たぬき'],types:['社交家','フットワーク軽'],life:[3,7]},
+  {id:'⑧',name:'戦略家（設計者）',emoji:'♟️',desc:'複雑な情報を整理し、勝ち筋と全体設計を描く構想タイプ。',fit:'戦略設計・商品設計・リサーチ・分析に強い。',weights:{A:0,B:2,C:1,D:4},shusei:['印綬','偏印','傷官'],gogyo:['水','金'],animals:['猿','黒ひょう','狼'],types:['長距離ランナー','正直者'],life:[4,7,9]},
+  {id:'⑨',name:'オペレーター（裏方）',emoji:'🛠️',desc:'混乱を整え、仕組みで再現性を作る実務支援タイプ。',fit:'事務局・進行管理・運用改善・バックヤードに強い。',weights:{A:0,B:4,C:1,D:1},shusei:['正財','正官','印綬'],gogyo:['土','金'],animals:['コアラ','ゾウ','ひつじ'],types:['長距離ランナー','正直者'],life:[4,8]},
+  {id:'⑩',name:'リーダー',emoji:'👑',desc:'人・目標・進行を束ね、全体を前に進める統率タイプ。',fit:'プロジェクト責任者・組織運営・意思決定の中枢に強い。',weights:{A:2,B:2,C:2,D:1},shusei:['偏財','正官','偏印'],gogyo:['火','土'],animals:['ライオン','ゾウ'],types:['社交家','長距離ランナー'],life:[3,6]}
+];
+
+function selectBizAnswer(q,val,el){
+  curBizAnswers[q]=val;
+  document.querySelectorAll(`.quiz-opt[data-q="${q}"]`).forEach(btn=>btn.classList.remove('on'));
+  el.classList.add('on');
+}
+
+function calcLifePath(y,m,d){
+  let n=(String(y)+String(m)+String(d)).split('').reduce((a,b)=>a+Number(b||0),0);
+  while(n>9 && ![11,22,33].includes(n)) n=String(n).split('').reduce((a,b)=>a+Number(b||0),0);
+  return n;
+}
+
+function countBizValues(ans){
+  const counts={A:0,B:0,C:0,D:0};
+  Object.values(ans).forEach(v=>{if(v&&counts[v]!==undefined)counts[v]++;});
+  return counts;
+}
+
+function topTwoValues(counts){
+  return Object.entries(counts).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0])).slice(0,2).map(x=>x[0]);
+}
+
+function calcBusinessResult(ctx){
+  const counts=countBizValues(ctx.answers);
+  const lifePath=calcLifePath(ctx.y,ctx.m,ctx.d);
+  const roles=BIZ_ROLES.map(role=>{
+    let score=(counts.A||0)*(role.weights.A||0)+(counts.B||0)*(role.weights.B||0)+(counts.C||0)*(role.weights.C||0)+(counts.D||0)*(role.weights.D||0);
+    if(role.shusei.includes(ctx.shusei)) score+=3;
+    if(role.gogyo.includes(ctx.dg)) score+=2;
+    if(role.animals.includes(ctx.main.animal)) score+=2;
+    if(role.types.includes(ctx.main.type)) score+=1;
+    if(role.life.includes(lifePath)) score+=1;
+    return {...role,score};
+  }).sort((a,b)=>b.score-a.score);
+  const primary=roles[0], secondary=roles[1];
+  const [dom,sub]=topTwoValues(counts);
+  const domMeta=VALUE_META[dom], subMeta=VALUE_META[sub];
+
+  const baseLine=ctx.shuseiInfo.name==='鳳閣星'||ctx.shuseiInfo.name==='調舒星'
+    ? '相手の気持ちを言葉に変え、共感を作る力が強い生まれつきの表現者です。'
+    : ctx.shuseiInfo.name==='禄存星'||ctx.shuseiInfo.name==='司禄星'
+    ? '信頼を積み重ねながら、相手が安心して決断できる場を作る力が強いタイプです。'
+    : ctx.shuseiInfo.name==='龍高星'||ctx.shuseiInfo.name==='玉堂星'
+    ? '物事を深く理解し、相手に合わせて最適解を提示できる知性型です。'
+    : '状況を読んで自分の強みを発揮する、バランス型の実力者です。';
+
+  const gogyoLine={
+    木:'成長・挑戦・未来志向が強く、新しい可能性を見つけるのが得意です。',
+    火:'情熱・発信・推進力が強く、人の気持ちを動かしやすいタイプです。',
+    土:'安心感・継続力・受け止める力があり、信頼される土台になれます。',
+    金:'判断の鋭さ・洗練・完成度の高さがあり、決断の質を上げられます。',
+    水:'洞察・分析・柔軟性が高く、相手の本音や流れを読むのが得意です。'
+  };
+
+  const valueLead=counts[dom]>=2
+    ? `${dom}（${domMeta.name}）の価値観が現在かなり強く出ています。`
+    : `${dom}（${domMeta.name}）を軸にしつつ、${sub}（${subMeta.name}）も同時に使えるバランス型です。`;
+
+  const teamRole=`${primary.id}${primary.name}として、${primary.fit}。さらに${secondary.id}${secondary.name}の要素も持つため、${secondary.desc}`;
+  const headline=`あなたのビジネス戦闘タイプは…【${primary.id}${primary.name} ✕ ${secondary.id}${secondary.name}】のハイブリッド型！`;
+
+  const strengthText={
+    A:'ただ待つのではなく、自分から局面を動かせるのが最大の武器です。',
+    B:'安定した仕組みや再現性を作ることで、成果の波を小さくできます。',
+    C:'相手の感情や空気を読みながら、信頼で前に進めるのが強みです。',
+    D:'感覚だけでなく、根拠や専門性で説得できるのが強みです。'
+  };
+
+  const actionTip=`まずは${primary.name}の役割をメイン武器として使い、${secondary.name}をサブ武器として重ねると結果が出やすくなります。特に今は「${domMeta.short}」を前面に出すほど、あなたの本来の強さが仕事で伝わりやすくなります。`;
+
+  return {
+    lifePath,counts,primary,secondary,dominant:dom,secondaryValue:sub,
+    headline,baseLine,baseDetail:gogyoLine[ctx.dg],valueLead,
+    valueDetail:`${strengthText[dom]} さらに${subMeta.name}の要素もあるため、${subMeta.desc}`,
+    teamRole,actionTip
+  };
+}
+
+// ============================================================
+// START FORTUNE — LOADING PAGE
+// ============================================================
+function startFortune(){
+  const name=document.getElementById('i-name').value.trim();
+  const y=parseInt(document.getElementById('i-y').value);
+  const m=parseInt(document.getElementById('i-m').value);
+  const d=parseInt(document.getElementById('i-d').value);
+  const h=parseInt(document.getElementById('i-h').value);
+  const err=document.getElementById('err');
+  if(!name){err.textContent='お名前を入力してください';err.style.display='block';return;}
+  if(isNaN(y)||y<1900||y>2010){err.textContent='1900〜2010年を入力してください';err.style.display='block';return;}
+  if(isNaN(m)||m<1||m>12){err.textContent='1〜12月を入力してください';err.style.display='block';return;}
+  if(isNaN(d)||d<1||d>31){err.textContent='1〜31日を入力してください';err.style.display='block';return;}
+  if(Object.values(curBizAnswers).some(v=>!v)){err.textContent='3つの質問すべてに直感で回答してください';err.style.display='block';return;}
+  err.style.display='none';
+  document.getElementById('l-name').textContent=name+'さんの宿命を読み解いています';
+  showPage('loading');
+  const sids=['ls1','ls2','ls3','ls4','ls5'];
+  sids.forEach((id,i)=>setTimeout(()=>document.getElementById(id).classList.add('done'),500+i*450));
+  setTimeout(()=>buildResult(name,y,m,d,h,curSex),3500);
+}
+
+// ============================================================
+// BUILD RESULT
+// ============================================================
+function buildResult(name,y,m,d,h,sex){
+  const dp=dayP(y,m,d);
+  const ps={year:yearP(y,m,d),month:monthP(y,m,d),day:dp,hour:hourP(h,dp.ki)};
+  const gogyo=calcGogyo(ps);
+  const main=getAni(ps.day.ki,ps.day.si);
+  const surf=getAni(ps.month.ki,ps.month.si);
+  const dg=GOGYO[ps.day.kan];
+  const shusei=calcShusei(ps.day.kan,ps.month.kan);
+  const jusei1=calcJusei(ps.day.kan,ps.year.kan);
+  const shuseiInfo=SHUSEI_INFO[shusei]||SHUSEI_INFO['比肩'];
+  const radarVals=calcRadar(ps,gogyo,main,shusei);
+  const fortune=calcFortune(new Date(),ps);
+  const ju={y:juunsei(ps.day.kan,ps.year.shi),m:juunsei(ps.day.kan,ps.month.shi),d:juunsei(ps.day.kan,ps.day.shi),h:juunsei(ps.day.kan,ps.hour.shi)};
+  const ts={y:tsuh(ps.day.kan,ps.year.kan),m:tsuh(ps.day.kan,ps.month.kan),h:tsuh(ps.day.kan,ps.hour.kan)};
+  myData={name,y,m,d,h,sex,ps,gogyo,main,surf,dg,shusei,shuseiInfo,radarVals,fortune,answers:{...curBizAnswers},answerTexts:getAnswerTexts(curBizAnswers)};
+
+  // NAV
+  document.getElementById('r-nav-ttl').textContent=name+'さんの鑑定結果';
+
+  // HERO
+  const hbg=document.getElementById('r-hero-bg');
+  hbg.style.background=main.bg;
+  document.getElementById('r-sansei-b').textContent='⭐ '+shuseiInfo.name;
+  document.getElementById('r-emoji').textContent=main.emoji;
+  document.getElementById('r-animal').textContent=main.animal;
+  document.getElementById('r-type').textContent=main.type+' — '+main.desc;
+  document.getElementById('r-pillar').textContent='日柱 '+ps.day.kan+ps.day.shi;
+  document.getElementById('r-shogo').textContent=(SHOGO_GO[dg]||'')+' '+(SHOGO_TY[main.type]||'')+main.animal;
+
+  // 3層カード
+  document.getElementById('r-shusei').textContent=shuseiInfo.name;
+  document.getElementById('r-shusei-sub').textContent=shuseiInfo.short;
+  document.getElementById('r-tc-emoji').textContent=main.emoji;
+  document.getElementById('r-tc-ani').textContent=main.animal;
+  document.getElementById('r-tc-type').textContent=main.type;
+  document.getElementById('r-tc-gogyo').textContent=dg;
+  const GOGYO_TRAITS={木:'成長・正義',火:'情熱・明るさ',土:'安定・信頼',金:'完璧・洗練',水:'柔軟・知恵'};
+  const GOGYO_DETAIL={
+    木:'木の人は未来志向で、伸びしろを見つけるのが得意です。停滞よりも成長を選び、前進するほど本来の魅力が光ります。',
+    火:'火の人は感情の熱量が高く、人を動かすエネルギーを持っています。発信・共感・盛り上げ役として周囲を照らします。',
+    土:'土の人は安心感と受容力が強く、チームの土台として信頼されやすい存在です。継続するほど真価が出ます。',
+    金:'金の人は判断・完成・洗練が得意で、物事をきれいに整えて成果へ導く力があります。質にこだわるほど強みが活きます。',
+    水:'水の人は洞察力と柔軟性が高く、相手の本音や流れを読むのが得意です。情報整理や戦略面でも強さを発揮します。'
+  };
+  document.getElementById('r-tc-gogyo-sub').textContent=GOGYO_TRAITS[dg]||dg;
+
+  // レーダー
+  setTimeout(()=>drawRadar(radarVals),300);
+  const axes=['才能','感情','社交','意志','直感'];
+  document.getElementById('radar-vals').innerHTML=axes.map((ax,i)=>`<div class="rv-cell"><div class="rv-lbl">${ax}</div><div class="rv-num">${radarVals[i]}</div></div>`).join('');
+
+  // 添付1風の詳細カード
+  document.getElementById('detail-shusei').innerHTML=`
+    <div class="reading-hd"><span class="reading-icon">⭐</span><span class="reading-title">算命学主星「${shuseiInfo.name}」の詳しい意味</span></div>
+    <div class="reading-body">${shuseiInfo.short}タイプ。${shuseiInfo.trait}<br><br>ビジネスでは<strong>${shuseiInfo.talent}</strong>のような場面で才能が出やすく、逆に<strong>${shuseiInfo.weakness}</strong>が出ると本来の強みが伝わりにくくなります。</div>
+    <div class="kw-row">${[shuseiInfo.short,shuseiInfo.talent.split('・')[0],shuseiInfo.weakness.split('・')[0]].map(k=>`<span class="kw kw-g">◎ ${k}</span>`).join('')}</div>`;
+
+  document.getElementById('detail-animal').innerHTML=`
+    <div class="reading-hd"><span class="reading-icon">${main.emoji}</span><span class="reading-title">動物キャラ「${main.animal}」の詳しい意味</span></div>
+    <div class="reading-body">${main.animal}のあなたは、${main.desc}。さらにサブタイプの<strong>${main.type}</strong>が重なることで、${main.personality}。<br><br>第一印象では月柱側の${surf.animal}（${surf.type}）っぽく見られやすく、外からは親しみやすさや見せ方のうまさが伝わります。</div>
+    <div class="kw-row">${['◎ '+main.type,'◎ '+main.animal,'◎ '+surf.animal+'要素'].map(k=>`<span class="kw kw-g">${k}</span>`).join('')}</div>`;
+
+  document.getElementById('detail-gogyo').innerHTML=`
+    <div class="reading-hd"><span class="reading-icon">☯</span><span class="reading-title">日干五行「${dg}」の詳しい意味</span></div>
+    <div class="reading-body">${GOGYO_DETAIL[dg]}<br><br>あなたが意思決定する時は「${GOGYO_TRAITS[dg]}」が強く出ます。仕事ではこの五行を無理に変えるより、武器として前面に出した方が結果が出やすいタイプです。</div>
+    <div class="kw-row">${['◎ '+dg+'の強み','◎ '+GOGYO_TRAITS[dg],'◎ 意思決定の軸'].map(k=>`<span class="kw kw-g">${k}</span>`).join('')}</div>`;
+
+  // ビジネス戦闘タイプ
+  const bizResult=calcBusinessResult({name,y,m,d,sex,ps,dg,main,surf,shusei,shuseiInfo,answers:{...curBizAnswers}});
+  myData.biz=bizResult;
+  myData.answerTexts=getAnswerTexts(curBizAnswers);
+
+  document.getElementById('r-biztype-card').innerHTML=`
+    <div class="biz-hero-kicker">BUSINESS BATTLE TYPE</div>
+    <div class="biz-hero-title">${bizResult.headline}</div>
+    <div class="biz-role-row">
+      <span class="biz-role-chip main">${bizResult.primary.emoji} ${bizResult.primary.id}${bizResult.primary.name}</span>
+      <span class="biz-role-chip sub">${bizResult.secondary.emoji} ${bizResult.secondary.id}${bizResult.secondary.name}</span>
+      <span class="biz-role-chip value">価値観軸：${bizResult.dominant} / ${VALUE_META[bizResult.dominant].name}</span>
+    </div>
+    <div class="biz-summary">先天的ポテンシャル（生年月日）と、今の価値観（3つの選択）の両方を重ねた結果、<strong>${bizResult.primary.name}</strong>を主軸に、<strong>${bizResult.secondary.name}</strong>を重ねることで最も強く成果が出る設計です。</div>`;
+
+  document.getElementById('r-birth-base-card').innerHTML=`
+    <div class="reading-hd"><span class="reading-icon">🧬</span><span class="reading-title">あなたの本質（生年月日より）</span></div>
+    <div class="reading-body">${bizResult.baseLine}<br><br>${bizResult.baseDetail}<br><br>数秘では<strong>${bizResult.lifePath}</strong>の運命数を持ち、${bizResult.lifePath===1?'先頭に立つ力':bizResult.lifePath===2?'調整と共感の力':bizResult.lifePath===3?'表現と発信の力':bizResult.lifePath===4?'構築と継続の力':bizResult.lifePath===5?'変化を起こす力':bizResult.lifePath===6?'支援と責任感':bizResult.lifePath===7?'探究と洞察':bizResult.lifePath===8?'実現と影響力':'独自性と理想性'}がベースにあります。</div>`;
+
+  document.getElementById('r-value-card').innerHTML=`
+    <div class="reading-hd"><span class="reading-icon">🧭</span><span class="reading-title">現在のあなたの強み（選択肢より）</span></div>
+    <div class="reading-body">${bizResult.valueLead}<br><br>${bizResult.valueDetail}</div>
+    <div class="biz-checks">
+      ${Object.entries(bizResult.counts).map(([k,v])=>`<div class="biz-check"><div class="biz-check-lbl">${k} / ${VALUE_META[k].name}</div><div class="biz-check-val">選択数 ${v} ・ ${VALUE_META[k].desc}</div></div>`).join('')}
+    </div>`;
+
+  document.getElementById('r-team-role-card').innerHTML=`
+    <div class="reading-hd"><span class="reading-icon">🏹</span><span class="reading-title">チームでの役割</span></div>
+    <div class="reading-body">${bizResult.teamRole}<br><br>${bizResult.primary.desc} その上で、${bizResult.secondary.name}の要素が加わることで、表現力・説得力・再現性のどれかが一段階引き上がります。</div>`;
+
+  document.getElementById('r-action-card').innerHTML=`
+    <div class="reading-hd"><span class="reading-icon">⚡</span><span class="reading-title">勝ち筋アドバイス</span></div>
+    <div class="reading-body">${bizResult.actionTip}</div>
+    <div class="kw-row">
+      ${['◎ 主役：'+bizResult.primary.name,'◎ 補助：'+bizResult.secondary.name,'◎ 価値観：'+VALUE_META[bizResult.dominant].name].map(k=>`<span class="kw kw-g">${k}</span>`).join('')}
+    </div>`;
+
+  // 運勢・恋愛・仕事
+  buildFortune(ps,dg,fortune);
+  buildLove(ps,main,surf,dg,shuseiInfo,gogyo,ju);
+  buildWork(ps,main,dg,shuseiInfo,gogyo);
+
+  // 相性初期設定
+  document.getElementById('my-emoji2').textContent=main.emoji;
+  document.getElementById('my-name2').textContent=name+'さん';
+  document.getElementById('my-sub2').textContent=main.type+'の'+main.animal+' / '+shuseiInfo.name;
+  saveLeadToSheet();
+  showPage('result');
+  switchTab('honshitsu');
+}
+
+// ============================================================
+// RADAR CHART
+// ============================================================
+function drawRadar(vals){
+  const canvas=document.getElementById('radarCanvas');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height,cx=W/2,cy=H/2,R=88;
+  ctx.clearRect(0,0,W,H);
+  const N=5;
+  const labels=['才能','感情','社交','意志','直感'];
+  function xy(ang,r){return{x:cx+r*Math.cos(ang-Math.PI/2),y:cy+r*Math.sin(ang-Math.PI/2)};}
+  // grid
+  for(let ring=1;ring<=5;ring++){
+    ctx.beginPath();
+    for(let a=0;a<N;a++){const ang=2*Math.PI/N*a;const p=xy(ang,R*ring/5);a===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y);}
+    ctx.closePath();ctx.strokeStyle='rgba(255,255,255,0.07)';ctx.lineWidth=1;ctx.stroke();
+  }
+  // axes
+  for(let a=0;a<N;a++){const ang=2*Math.PI/N*a;const p=xy(ang,R);ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(p.x,p.y);ctx.strokeStyle='rgba(255,255,255,0.1)';ctx.lineWidth=1;ctx.stroke();}
+  // avg
+  ctx.beginPath();
+  for(let a=0;a<N;a++){const ang=2*Math.PI/N*a;const p=xy(ang,R*60/100);a===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y);}
+  ctx.closePath();ctx.fillStyle='rgba(255,255,255,0.04)';ctx.fill();ctx.strokeStyle='rgba(255,255,255,0.18)';ctx.lineWidth=1.5;ctx.stroke();
+  // values
+  ctx.beginPath();
+  for(let a=0;a<N;a++){const ang=2*Math.PI/N*a;const p=xy(ang,R*vals[a]/100);a===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y);}
+  ctx.closePath();
+  const grad=ctx.createLinearGradient(0,0,W,H);
+  grad.addColorStop(0,'rgba(168,85,247,0.55)');grad.addColorStop(1,'rgba(99,102,241,0.55)');
+  ctx.fillStyle=grad;ctx.fill();ctx.strokeStyle='#a855f7';ctx.lineWidth=2.5;ctx.stroke();
+  // dots
+  for(let a=0;a<N;a++){const ang=2*Math.PI/N*a;const p=xy(ang,R*vals[a]/100);ctx.beginPath();ctx.arc(p.x,p.y,4.5,0,2*Math.PI);ctx.fillStyle='#fff';ctx.fill();}
+  // labels
+  ctx.font='bold 11px "Noto Sans JP",sans-serif';
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  for(let a=0;a<N;a++){const ang=2*Math.PI/N*a;const p=xy(ang,R+20);ctx.fillStyle='rgba(255,255,255,0.75)';ctx.fillText(labels[a],p.x,p.y);}
+}
+
+// ============================================================
+// FORTUNE CARDS
+// ============================================================
+function buildFortune(ps,dg,fortune){
+  const now=new Date();
+  const MN=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+
+  const AREA_NAMES=['恋愛運','仕事運','金運','健康運'];
+  const AREA_ICONS=['💕','💼','💰','🌿'];
+  const SEEDS=[3,7,11,13];
+
+  function mkAreas(score){return AREA_NAMES.map((n,i)=>({name:n,icon:AREA_ICONS[i],score:Math.min(5,Math.max(1,((score+SEEDS[i]*3)%5)+1))}));}
+
+  document.getElementById('fc-today').innerHTML=mkFCard(
+    `${now.getFullYear()}年${MN[now.getMonth()]}${now.getDate()}日（今日）`,
+    fortune.day, mkAreas(fortune.day), dg, getTodayMsg(dg,fortune.day)
+  );
+  document.getElementById('fc-month').innerHTML=mkFCard(
+    `${now.getFullYear()}年${MN[now.getMonth()]}（今月）`,
+    fortune.month, mkAreas(fortune.month), dg, getMonthMsg(dg,fortune.month)
+  );
+  document.getElementById('fc-year').innerHTML=mkFCard(
+    `${now.getFullYear()}年（今年）`,
+    fortune.year, mkAreas(fortune.year), dg, getYearMsg(dg,fortune.year)
+  );
+
+  document.getElementById('r-uranai-adv').innerHTML=`
+    <div class="reading-hd"><span class="reading-icon">💡</span><span class="reading-title">三命統合アドバイス</span></div>
+    <div class="reading-body">今日(${getFW(fortune.day).word})・今月(${getFW(fortune.month).word})・今年(${getFW(fortune.year).word})の流れを総合すると、<strong>${dg}の気</strong>を持つあなたへのアドバイス：<br><br>${getAdvice(dg,fortune.day,fortune.month,fortune.year)}</div>`;
+
+  setTimeout(()=>document.querySelectorAll('.gg-bar').forEach(el=>el.style.width=el.dataset.w+'%'),250);
+}
+
+function mkFCard(dateStr,score,areas,dg,msg){
+  const fw=getFW(score);
+  const lk=LUCKY_ITEMS;
+  return `<div style="background:${fw.bg};border:1px solid ${fw.color}44;border-radius:18px;padding:16px;">
+    <div class="fc-date">${dateStr}</div>
+    <div class="fc-center">
+      <div class="fc-circle" style="border-color:${fw.color};color:${fw.color};">${fw.emoji}</div>
+      <div class="fc-word" style="color:${fw.color};">${fw.word}</div>
+      <div class="fc-score">総合運 ${score}点</div>
+    </div>
+    <div class="fc-areas">
+      ${areas.map(a=>`<div class="fc-area"><div class="fc-a-icon">${a.icon}</div><div class="fc-a-lbl">${a.name}</div><div class="fc-a-stars" style="color:${a.score>=4?'#f59e0b':'rgba(255,255,255,.35)'}">${'★'.repeat(a.score)}${'☆'.repeat(5-a.score)}</div></div>`).join('')}
+    </div>
+    <div class="fc-msg">
+      <div class="fc-msg-ttl" style="color:${fw.color};">✦ ${fw.word}メッセージ</div>
+      <div class="fc-msg-body">${msg}</div>
+    </div>
+    <div class="fc-lucky">
+      <div class="fc-lucky-ttl">🍀 LUCKY INFO</div>
+      <div class="fc-lucky-grid">
+        <div class="lk-item"><div class="lk-icon">🎨</div><div class="lk-val">${lk.color[dg]}</div><div class="lk-lbl">ラッキーカラー</div></div>
+        <div class="lk-item"><div class="lk-icon">🔢</div><div class="lk-val">${lk.num[dg]}</div><div class="lk-lbl">ラッキーナンバー</div></div>
+        <div class="lk-item"><div class="lk-icon">🧭</div><div class="lk-val">${lk.dir[dg]}</div><div class="lk-lbl">ラッキー方位</div></div>
+        <div class="lk-item"><div class="lk-icon">🍽️</div><div class="lk-val">${lk.food[dg]}</div><div class="lk-lbl">ラッキーフード</div></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function getTodayMsg(dg,s){
+  const m={木:{h:'新しいことを始める絶好の日。成長エネルギーが最大発揮されます。積極的な行動で道が開けます。',l:'焦りを感じる日かも。木の誠実さを武器に一歩一歩進みましょう。'},火:{h:'情熱とエネルギーが溢れる輝かしい一日。人との交流から良いことが生まれます。',l:'感情的になりやすい日。冷静な判断で状況が好転します。'},土:{h:'安定した穏やかな一日。地道な努力が実を結ぶ時。信頼できる人との絆を深めましょう。',l:'停滞感を感じるかも。土の安定力を信じ着実に進むことが開運の鍵です。'},金:{h:'鋭い判断力が冴え渡る日。完璧主義が光を放ちます。重要な決断に向いています。',l:'完璧を求めすぎてストレスが溜まりそう。少し休息を取ることも大切です。'},水:{h:'直感と知恵が冴える特別な日。流れに乗ることで素晴らしい出会いが訪れます。',l:'迷いやすい一日。水の柔軟性を活かし状況に応じて方向転換することが大切です。'}};
+  return(m[dg]?.[s>=65?'h':'l'])||'今日も自分らしく過ごすことが最大の開運です。';
+}
+function getMonthMsg(dg,s){
+  const b={木:'今月は成長と変化の月。新しいチャレンジを恐れずに。',火:'今月は情熱を行動に変える時。人脈が道を開きます。',土:'今月は信頼関係を築く月。地道な積み重ねが未来の実りに。',金:'今月は判断力が冴える月。重要な決断は今月中に。',水:'今月は流れに敏感になる月。直感に従い行動を。'};
+  return(b[dg]||'三命の力を信じて進みましょう。')+(s>=75?' 月後半から運気が上昇します。':s>=60?' 中旬以降に好転の兆しが見えます。':' 忍耐が試される月ですが、乗り越えた先に光があります。');
+}
+function getYearMsg(dg,s){
+  const b={木:'今年は飛躍の年。木の成長エネルギーが最大化し、新たなステージへ進む機会が訪れます。',火:'今年は情熱の年。火の力が燃え上がり、夢に向かって大きく前進できる年です。',土:'今年は収穫の年。これまでの努力が実り、安定と繁栄をもたらします。',金:'今年は完成の年。あなたの真価が世に認められる輝かしい年となります。',水:'今年は深化の年。人生の本質的な価値に気づき、真の知恵が開花します。'};
+  return(b[dg]||'今年も三命の力を総動員して。')+(s>=75?' 2026年の丙午の年があなたに特別な意味を持ちます。':' 試練もありますが、それがあなたを大きく成長させる糧です。');
+}
+function getAdvice(dg,td,mon,yr){
+  const a={木:'今この瞬間の勢いを活かしながら、今月・今年の流れを見据えて行動することが大切です。木の成長エネルギーは長期的な視野と合わさって最大の力を発揮します。',火:'情熱は今日この瞬間に燃やすもの。今月・今年の大きな流れの中でその炎を方向性を持って燃やし続けてください。',土:'土の力は積み重ね。今日一日の誠実な行動が今月・今年の大きな実りへとつながります。',金:'今日の鋭い判断を今月・今年の大きな目標達成に向けて活かしてください。',水:'水は流れの中で力を増します。今日の直感・今月の洞察・今年の大きな流れを統合して行動を。'};
+  return a[dg]||'三命の力を統合し、今日・今月・今年を最大限に活かしてください。';
+}
+
+// ============================================================
+// LOVE PANEL
+// ============================================================
+function buildLove(ps,main,surf,dg,shuseiInfo,gogyo,ju){
+  const LOVE_BEST={木:['火','水'],火:['木','土'],土:['火','金'],金:['土','水'],水:['金','木']};
+  const LOVE_TYPE={長距離ランナー:'一途に深く愛する',社交家:'明るく楽しい恋愛',正直者:'純粋で真剣な恋愛',フットワーク軽:'自由で刺激的な恋愛',情熱家:'情熱的で激しい恋愛'};
+  const compatible=LOVE_BEST[dg]?.join('・')||'木・火';
+  const loveScore=Math.min(95,Math.max(40,65+(Object.values(gogyo).reduce((a,b)=>a+b,0)%20)));
+  document.getElementById('love-inner').innerHTML=`
+    <div class="reading" style="margin:0 16px 10px;">
+      <div class="reading-hd"><span class="reading-icon">💕</span><span class="reading-title">恋愛の本質</span></div>
+      <div class="reading-body">${main.animal}（${main.type}）の恋愛スタイルは「<strong>${LOVE_TYPE[main.type]||'深く真剣な恋愛'}</strong>」です。<br><br>算命学の主星「${shuseiInfo.name}」を持つあなたの恋愛は、${shuseiInfo.trait.substring(0,50)}という特性が深く反映されます。<br><br>十二大従星「${ju.d}」が示す通り、愛に対して真摯であることがあなたの最大の魅力です。</div>
+      <div class="kw-row"><span class="kw kw-g">◎ 相性良い：${compatible}の人</span></div>
+    </div>
+    <div class="reading" style="margin:0 16px 10px;">
+      <div class="reading-hd"><span class="reading-icon">💑</span><span class="reading-title">恋愛運スコア</span></div>
+      <div class="gauge-row"><div class="g-lbl">総合恋愛</div><div class="g-bar-bg"><div class="g-bar" style="background:linear-gradient(90deg,#ec4899,#f43f5e)" data-w="${loveScore}"></div></div><div class="g-val">${loveScore}</div></div>
+      <div class="gauge-row"><div class="g-lbl">相性力</div><div class="g-bar-bg"><div class="g-bar" style="background:linear-gradient(90deg,#a855f7,#6366f1)" data-w="${Math.round(loveScore*.9)}"></div></div><div class="g-val">${Math.round(loveScore*.9)}</div></div>
+      <div class="gauge-row"><div class="g-lbl">魅力度</div><div class="g-bar-bg"><div class="g-bar" style="background:linear-gradient(90deg,#f59e0b,#f97316)" data-w="${Math.min(98,Math.round(loveScore*1.05))}"></div></div><div class="g-val">${Math.min(98,Math.round(loveScore*1.05))}</div></div>
+    </div>
+    <div class="reading" style="margin:0 16px 10px;">
+      <div class="reading-hd"><span class="reading-icon">💍</span><span class="reading-title">理想のパートナー像</span></div>
+      <div class="reading-body">${dg}の気を持つあなたには、相生関係にある「${compatible}」の人が最良のパートナーです。<br><br>あなたの${shuseiInfo.short}の特性を深く理解し、尊重してくれる人との縁が最も強く結ばれます。</div>
+    </div>`;
+  setTimeout(()=>document.querySelectorAll('.g-bar').forEach(el=>el.style.width=el.dataset.w+'%'),300);
+}
+
+// ============================================================
+// WORK PANEL
+// ============================================================
+function buildWork(ps,main,dg,shuseiInfo,gogyo){
+  const WORK_BEST={木:'教育・環境・農業・建築',火:'エンタメ・飲食・IT・販売',土:'不動産・農業・建設・製造',金:'金融・医療・テック・法律',水:'水産・旅行・通信・コンサル'};
+  const workScore=Math.min(95,Math.max(40,60+(Object.values(gogyo).reduce((a,b)=>a+b,0)%25)));
+  document.getElementById('work-inner').innerHTML=`
+    <div class="reading" style="margin:0 16px 10px;">
+      <div class="reading-hd"><span class="reading-icon">💼</span><span class="reading-title">仕事の才能</span></div>
+      <div class="reading-body">算命学の主星「<strong>${shuseiInfo.name}</strong>」を持つあなたは、${shuseiInfo.talent}の分野で特に才能を発揮します。<br><br>${dg}の気を持つあなたに向いている業種：<strong>${WORK_BEST[dg]||'教育・創造・研究'}</strong><br><br>動物キャラ「${main.animal}（${main.type}）」の特性：${main.personality}がビジネスでも活きます。</div>
+    </div>
+    <div class="reading" style="margin:0 16px 10px;">
+      <div class="reading-hd"><span class="reading-icon">📈</span><span class="reading-title">仕事運スコア</span></div>
+      <div class="gauge-row"><div class="g-lbl">総合仕事運</div><div class="g-bar-bg"><div class="g-bar" style="background:linear-gradient(90deg,#6366f1,#4f46e5)" data-w="${workScore}"></div></div><div class="g-val">${workScore}</div></div>
+      <div class="gauge-row"><div class="g-lbl">出世運</div><div class="g-bar-bg"><div class="g-bar" style="background:linear-gradient(90deg,#f59e0b,#d97706)" data-w="${Math.round(workScore*.85)}"></div></div><div class="g-val">${Math.round(workScore*.85)}</div></div>
+      <div class="gauge-row"><div class="g-lbl">金運</div><div class="g-bar-bg"><div class="g-bar" style="background:linear-gradient(90deg,#22c55e,#16a34a)" data-w="${Math.round(workScore*.95)}"></div></div><div class="g-val">${Math.round(workScore*.95)}</div></div>
+      <div class="gauge-row"><div class="g-lbl">対人運</div><div class="g-bar-bg"><div class="g-bar" style="background:linear-gradient(90deg,#ec4899,#db2777)" data-w="${Math.min(98,Math.round(workScore*1.02))}"></div></div><div class="g-val">${Math.min(98,Math.round(workScore*1.02))}</div></div>
+    </div>
+    <div class="reading" style="margin:0 16px 10px;">
+      <div class="reading-hd"><span class="reading-icon">⚡</span><span class="reading-title">才能の弱点と克服法</span></div>
+      <div class="reading-body">あなたの弱点：<strong>${shuseiInfo.weakness}</strong><br><br>${getWeaknessAdv(dg)}</div>
+      <div class="kw-row"><span class="kw kw-b">△ ${shuseiInfo.weakness.split('・')[0]}</span></div>
+    </div>`;
+  setTimeout(()=>document.querySelectorAll('.g-bar').forEach(el=>el.style.width=el.dataset.w+'%'),300);
+}
+function getWeaknessAdv(dg){
+  const a={木:'木の力は成長にあります。頑固さを柔軟性に変え、他者の視点も積極的に取り入れることで才能が開花します。',火:'情熱は素晴らしい力ですが、感情的になりやすい面も。冷静な判断と組み合わせることで最大の成果を。',土:'安定を求める反面、変化を恐れる傾向があります。新しいことへの挑戦が土の力をさらに強化します。',金:'完璧主義が時に自分を縛ります。80%の完成度で動き出すことが成功の鍵です。',水:'柔軟すぎて流されることも。自分の軸をしっかり持ちながらその柔軟性を活かすことが大切です。'};
+  return a[dg]||'弱点を知ることが強みを活かす第一歩です。';
+}
+
+// ============================================================
+// COMPAT
+// ============================================================
+function doCompat(){
+  if(!myData)return;
+  const name=document.getElementById('c-name').value.trim();
+  if(!name){alert('お相手のお名前を入力してください');return;}
+  const y=parseInt(document.getElementById('c-y').value);
+  const m=parseInt(document.getElementById('c-m').value);
+  const d=parseInt(document.getElementById('c-d').value);
+  if(isNaN(y)||isNaN(m)||isNaN(d)){alert('お相手の生年月日を入力してください');return;}
+  const dp2=dayP(y,m,d);
+  const ps2={year:yearP(y,m,d),month:monthP(y,m,d),day:dp2,hour:hourP(12,dp2.ki)};
+  const gogyo2=calcGogyo(ps2);
+  const main2=getAni(ps2.day.ki,ps2.day.si);
+  const dg2=GOGYO[ps2.day.kan];
+  const shusei2=calcShusei(ps2.day.kan,ps2.month.kan);
+  const shuseiInfo2=SHUSEI_INFO[shusei2]||SHUSEI_INFO['比肩'];
+
+  let score=60;
+  const myDg=myData.dg,paDg=dg2;
+  if(S10[myDg]===paDg||S10[paDg]===myDg)score+=18;
+  else if(myDg===paDg)score+=12;
+  else if(K10[myDg]===paDg||K10[paDg]===myDg)score-=12;
+  ['木','火','土','金','水'].forEach(g=>{if(Math.abs((myData.gogyo[g]||0)-(gogyo2[g]||0))<=1)score+=4;});
+  if(myData.main.animal===main2.animal)score+=10;
+  score=Math.min(98,Math.max(30,score+(Math.abs(myData.ps.day.ki-dp2.ki)%7)));
+
+  const lv=score>=85?{l:'天命の縁💖',c:'#ec4899'}:score>=75?{l:'深い縁💛',c:'#f59e0b'}:score>=65?{l:'良縁💙',c:'#6366f1'}:{l:'学びの縁🩶',c:'#6b7280'};
+  const total=2*Math.PI*60;
+  const fill=(score/100*total).toFixed(1);
+
+  const res=document.getElementById('compat-result');
+  res.style.display='block';
+  res.innerHTML=`
+    <div class="compat-card" style="background:linear-gradient(135deg,rgba(236,72,153,.12),rgba(168,85,247,.08));border:1px solid rgba(236,72,153,.2);margin:0 16px 10px;">
+      <div class="compat-pair">
+        <div class="cp-side"><span class="cp-emoji">${myData.main.emoji}</span><div class="cp-name">${myData.name}</div></div>
+        <div class="cp-heart">💕</div>
+        <div class="cp-side"><span class="cp-emoji">${main2.emoji}</span><div class="cp-name">${name}</div></div>
+      </div>
+      <div class="score-ring-wrap">
+        <svg width="140" height="140" viewBox="0 0 140 140" style="transform:rotate(-90deg)">
+          <circle cx="70" cy="70" r="60" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="12"/>
+          <circle cx="70" cy="70" r="60" fill="none" stroke="${lv.c}" stroke-width="12" stroke-linecap="round"
+            stroke-dasharray="${fill} ${total.toFixed(1)}" stroke-dashoffset="0" style="transition:stroke-dasharray 1.5s ease-out;"/>
+        </svg>
+        <div class="score-ring-num"><div class="score-big" style="color:${lv.c}">${score}</div><div class="score-max">/100</div></div>
+      </div>
+      <div class="compat-lv" style="color:${lv.c}">${lv.l}</div>
+      <div class="compat-desc-text">${getCompatDesc(myDg,dg2,score,myData.main.animal,main2.animal,name)}</div>
+    </div>
+    <div class="reading" style="margin:0 16px 10px;">
+      <div class="reading-hd"><span class="reading-icon">☯</span><span class="reading-title">五行相性分析</span></div>
+      <div class="reading-body">あなた（${myDg}）× ${name}さん（${dg2}）：<strong>${getGogyoRel(myDg,dg2)}</strong><br><br>${getGogyoRelDesc(myDg,dg2)}</div>
+    </div>
+    <div class="reading" style="margin:0 16px 10px;">
+      <div class="reading-hd"><span class="reading-icon">⭐</span><span class="reading-title">算命学 星の相性</span></div>
+      <div class="reading-body">あなたの主星「${myData.shuseiInfo.name}」× ${name}さんの主星「${shuseiInfo2.name}」<br><br>${getSanmeiCompat(myData.shusei,shusei2)}</div>
+    </div>`;
+}
+function getCompatDesc(dg1,dg2,score,ani1,ani2,name){
+  if(S10[dg1]===dg2)return`あなたの${dg1}の力が${name}さんの${dg2}を育てる「相生」の関係。自然とリードできる素晴らしい縁です。`;
+  if(S10[dg2]===dg1)return`${dg2}の力があなたの${dg1}を育てる「相生」の関係。サポートを受けながら共に成長できます。`;
+  if(K10[dg1]===dg2||K10[dg2]===dg1)return`五行的に緊張感のある「相剋」の関係。この緊張が二人を磨き合い、成長させます。`;
+  return score>=65?`同じ価値観を持つ二人。理解し合いながら深い絆を育めます。`:`異なる個性を持つ二人。お互いの違いを尊重することで良い関係が生まれます。`;
+}
+function getGogyoRel(d1,d2){
+  if(S10[d1]===d2)return d1+'が'+d2+'を生む「相生関係」';
+  if(S10[d2]===d1)return d2+'が'+d1+'を生む「相生関係」';
+  if(K10[d1]===d2)return d1+'が'+d2+'を剋す「相剋関係」';
+  if(K10[d2]===d1)return d2+'が'+d1+'を剋す「相剋関係」';
+  if(d1===d2)return '同じ'+d1+'「比和関係」';
+  return '「無関係」';
+}
+function getGogyoRelDesc(d1,d2){
+  if(S10[d1]===d2||S10[d2]===d1)return '相生関係は最良の組み合わせ。一方がもう一方を自然に助け、共に成長できる最高のパートナーシップです。';
+  if(K10[d1]===d2||K10[d2]===d1)return '相剋関係は刺激的な組み合わせ。緊張感はありますが、お互いを磨き合う関係です。理解と包容力があれば強い絆が生まれます。';
+  return '同気関係は安定した組み合わせ。価値観が似ており、自然体でいられる関係です。';
+}
+function getSanmeiCompat(s1,s2){
+  if(s1===s2)return '同じ主星を持つ二人。同じ価値観と才能を持ち、深く理解し合える特別な縁です。';
+  if(['比肩','劫財'].includes(s1)&&['比肩','劫財'].includes(s2))return '共に独立心旺盛な星の持ち主。お互いの自立を尊重し合うことで素晴らしい関係が築けます。';
+  return '異なる星の組み合わせが二人の可能性を広げます。お互いの得意分野を活かし合うことで理想のパートナーシップが生まれます。';
+}
+
+// ============================================================
+// SHARE
+// ============================================================
+function doShare(){
+  if(!myData)return;
+  const txt=`【宇宙三命鑑定 × ビジネス戦闘タイプ】\n${myData.name}さんの結果\n動物：${myData.main.emoji}${myData.main.animal}（${myData.main.type}）\n算命学：${myData.shuseiInfo.name}\n称号：${document.getElementById('r-shogo').textContent}\n#三命鑑定 #四柱推命 #動物占い #算命学`;
+  if(navigator.clipboard){navigator.clipboard.writeText(txt).then(()=>{const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);});}
+}
+
+// ============================================================
+// SAVE RESULT AS IMAGE
+// ============================================================
+
+let cardDataURL = null;
+
+function openSaveModal() {
+  if (!myData) return;
+  const overlay = document.getElementById('saveModalOverlay');
+  overlay.classList.add('open');
+  const btn = document.getElementById('saveDownloadBtn');
+  btn.disabled = true;
+  document.getElementById('savePreviewWrap').innerHTML = '<div class="save-generating">✨ カード生成中...</div>';
+  cardDataURL = null;
+  // 非同期で生成
+  setTimeout(() => generateCardCanvas(), 80);
+}
+
+function closeSaveModal(e) {
+  if (e && e.target !== document.getElementById('saveModalOverlay')) return;
+  document.getElementById('saveModalOverlay').classList.remove('open');
+}
+
+function generateCardCanvas() {
+  const canvas = document.getElementById('resultCardCanvas');
+  const ctx = canvas.getContext('2d');
+  const d = myData;
+  const W = 1080;
+  const PAD = 64;
+  const CARD_GAP = 24;
+  const textColor = '#f8fafc';
+  const subColor = 'rgba(255,255,255,0.72)';
+  const faint = 'rgba(255,255,255,0.46)';
+  const lineColor = 'rgba(255,255,255,0.08)';
+  const gogyoSub = (document.getElementById('r-tc-gogyo-sub')?.textContent) || d.dg;
+  const gogyoLong = d.dg==='木'
+    ? '木の人は未来志向で、伸びしろを見つけるのが得意です。停滞よりも成長を選び、前進するほど本来の魅力が光ります。'
+    : d.dg==='火'
+    ? '火の人は感情の熱量が高く、人を動かすエネルギーを持っています。発信・共感・盛り上げ役として周囲を照らします。'
+    : d.dg==='土'
+    ? '土の人は安心感と受容力が強く、チームの土台として信頼されやすい存在です。継続するほど真価が出ます。'
+    : d.dg==='金'
+    ? '金の人は判断・完成・洗練が得意で、物事をきれいに整えて成果へ導く力があります。質にこだわるほど強みが活きます。'
+    : '水の人は洞察力と柔軟性が高く、相手の本音や流れを読むのが得意です。情報整理や戦略面でも強さを発揮します。';
+
+  const sections = [
+    {type:'hero', h:340},
+    {type:'bizhero', h:250},
+    {type:'triple', h:224},
+    {type:'radar', h:390},
+    {
+      type:'detail',
+      title:`⭐ 算命学主星「${d.shuseiInfo.name}」`,
+      body:`${d.shuseiInfo.short}タイプ。${d.shuseiInfo.trait}
+
+ビジネスでは${d.shuseiInfo.talent}の場面で才能が出やすく、${d.shuseiInfo.weakness}が出ると本来の強みが伝わりにくくなります。`,
+      chips:[d.shuseiInfo.short,d.shuseiInfo.talent.split('・')[0],d.shuseiInfo.weakness.split('・')[0]],
+      h:260
+    },
+    {
+      type:'detail',
+      title:`${d.main.emoji} 動物キャラ「${d.main.animal}」`,
+      body:`${d.main.animal}のあなたは、${d.main.desc}。さらにサブタイプの${d.main.type}が重なることで、${d.main.personality}。
+
+第一印象では月柱側の${d.surf.animal}（${d.surf.type}）っぽく見られやすく、外からは親しみやすさや見せ方のうまさが伝わります。`,
+      chips:[d.main.type,d.main.animal,`${d.surf.animal}要素`],
+      h:270
+    },
+    {
+      type:'detail',
+      title:`☯ 日干五行「${d.dg}」`,
+      body:`${gogyoLong}
+
+意思決定の軸は「${gogyoSub}」。この五行を無理に変えるより、武器として前面に出した方が結果が出やすいタイプです。`,
+      chips:[`${d.dg}の強み`,gogyoSub,'意思決定の軸'],
+      h:260
+    },
+    {
+      type:'reading',
+      icon:'🧬',
+      title:'あなたの本質（生年月日より）',
+      body:`${d.biz.baseLine}
+
+${d.biz.baseDetail}
+
+数秘では${d.biz.lifePath}の運命数を持ちます。`,
+      h:230
+    },
+    {
+      type:'reading',
+      icon:'🧭',
+      title:'現在のあなたの強み（選択結果より）',
+      body:`${d.biz.valueLead}
+
+${d.biz.valueDetail}`,
+      h:250
+    },
+    {type:'counts', h:240},
+    {
+      type:'reading',
+      icon:'🏹',
+      title:'チームでの役割',
+      body:`${d.biz.teamRole}
+
+${d.biz.primary.desc} その上で、${d.biz.secondary.name}の要素が加わることで、表現力・説得力・再現性のどれかが一段階引き上がります。`,
+      h:250
+    },
+    {
+      type:'reading',
+      icon:'⚡',
+      title:'勝ち筋アドバイス',
+      body:d.biz.actionTip,
+      h:220
+    },
+    {type:'footer', h:110}
+  ];
+
+  const H = sections.reduce((sum,s)=>sum+s.h,0) + PAD*2 + CARD_GAP*(sections.length-1);
+  canvas.width = W;
+  canvas.height = H;
+
+  const bg = ctx.createLinearGradient(0,0,W,H);
+  bg.addColorStop(0,'#120724');
+  bg.addColorStop(0.4,'#0f183d');
+  bg.addColorStop(1,'#050814');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0,0,W,H);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.75)';
+  for(let i=0;i<150;i++){
+    const x=Math.random()*W, y=Math.random()*H, r=Math.random()*1.8+0.3;
+    ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
+  }
+
+  const glow = ctx.createRadialGradient(W/2, 120, 0, W/2, 120, 420);
+  glow.addColorStop(0,'rgba(168,85,247,0.28)');
+  glow.addColorStop(1,'rgba(168,85,247,0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0,0,W,520);
+
+  function fillTextWrapped(text,x,y,maxWidth,lineHeight,color,font){
+    ctx.fillStyle=color;
+    ctx.font=font;
+    ctx.textAlign='left';
+    const paras=String(text).split(String.fromCharCode(10));
+    let yy=y;
+    for(const para of paras){
+      const words=para.split('');
+      let line='';
+      for(const ch of words){
+        const test=line+ch;
+        if(ctx.measureText(test).width>maxWidth && line){ ctx.fillText(line,x,yy); yy+=lineHeight; line=ch; }
+        else line=test;
+      }
+      if(line){ ctx.fillText(line,x,yy); yy+=lineHeight; }
+      yy+=8;
+    }
+    return yy;
+  }
+
+  function drawCard(x,y,w,h,stroke='rgba(255,255,255,0.09)',fill='rgba(9,12,28,0.66)'){
+    ctx.fillStyle=fill; roundRect(ctx,x,y,w,h,28); ctx.fill();
+    ctx.strokeStyle=stroke; ctx.lineWidth=1; roundRect(ctx,x,y,w,h,28); ctx.stroke();
+  }
+
+  function chip(x,y,text,fg,bg,bd){
+    ctx.font='700 22px sans-serif';
+    const tw=ctx.measureText(text).width;
+    const ww=tw+34;
+    ctx.fillStyle=bg; roundRect(ctx,x,y,ww,42,21); ctx.fill();
+    ctx.strokeStyle=bd; roundRect(ctx,x,y,ww,42,21); ctx.stroke();
+    ctx.fillStyle=fg; ctx.fillText(text,x+17,y+28);
+    return ww;
+  }
+
+  let y = PAD;
+
+  drawCard(PAD,y,W-PAD*2,340,'rgba(255,255,255,0.10)','rgba(11,18,38,0.58)');
+  ctx.textAlign='center';
+  ctx.fillStyle='rgba(255,255,255,0.46)';
+  ctx.font='600 28px sans-serif';
+  ctx.fillText('宇宙三命鑑定｜本質結果カード',W/2,y+48);
+  ctx.font='120px sans-serif'; ctx.fillStyle='#fff'; ctx.fillText(d.main.emoji,W/2,y+172);
+  const ng=ctx.createLinearGradient(PAD+120,0,W-PAD-120,0); ng.addColorStop(0,'#e9d5ff'); ng.addColorStop(0.5,'#bfdbfe'); ng.addColorStop(1,'#fbcfe8');
+  ctx.fillStyle=ng; ctx.font='700 64px sans-serif'; ctx.fillText(d.main.animal,W/2,y+248);
+  ctx.fillStyle=subColor; ctx.font='600 30px sans-serif'; ctx.fillText(`${d.name} さんの本質診断`,W/2,y+292);
+  ctx.fillStyle='#fcd34d'; ctx.font='700 26px sans-serif';
+  ctx.fillText(`《 ${d.biz.primary.id}${d.biz.primary.name} × ${d.biz.secondary.id}${d.biz.secondary.name} 》`,W/2,y+326);
+  y += 340 + CARD_GAP;
+
+  drawCard(PAD,y,W-PAD*2,250,'rgba(251,191,36,0.14)','rgba(12,14,30,0.64)');
+  const bg2=ctx.createLinearGradient(PAD,y,PAD+(W-PAD*2),y+250);
+  bg2.addColorStop(0,'rgba(245,158,11,0.10)'); bg2.addColorStop(1,'rgba(168,85,247,0.08)');
+  ctx.fillStyle=bg2; roundRect(ctx,PAD,y,W-PAD*2,250,28); ctx.fill();
+  ctx.textAlign='left';
+  ctx.fillStyle='rgba(255,255,255,0.48)'; ctx.font='700 21px sans-serif'; ctx.fillText('BUSINESS BATTLE TYPE',PAD+34,y+44);
+  fillTextWrapped(d.biz.headline,PAD+34,y+84,W-PAD*2-68,42,textColor,'700 40px sans-serif');
+  let cx=PAD+34; const cy=y+164;
+  cx += chip(cx,cy,`${d.biz.primary.emoji} ${d.biz.primary.id}${d.biz.primary.name}`,'#fde68a','rgba(245,158,11,0.14)','rgba(245,158,11,0.28)') + 14;
+  cx += chip(cx,cy,`${d.biz.secondary.emoji} ${d.biz.secondary.id}${d.biz.secondary.name}`,'#ddd6fe','rgba(168,85,247,0.14)','rgba(168,85,247,0.28)') + 14;
+  chip(cx,cy,`価値観軸：${d.biz.dominant} / ${VALUE_META[d.biz.dominant].name}`,'#fcd34d','rgba(250,204,21,0.10)','rgba(250,204,21,0.28)');
+  y += 250 + CARD_GAP;
+
+  drawCard(PAD,y,W-PAD*2,224,lineColor,'rgba(10,13,26,0.56)');
+  const triples=[
+    {icon:'⭐',label:'算命学主星',value:d.shuseiInfo.name,sub:d.shuseiInfo.short,glow:'rgba(250,204,21,0.25)'},
+    {icon:d.main.emoji,label:'動物キャラ',value:d.main.animal,sub:d.main.type,glow:'rgba(236,72,153,0.18)'},
+    {icon:'☯',label:'日干五行',value:d.dg,sub:gogyoSub,glow:'rgba(96,165,250,0.18)'}
+  ];
+  triples.forEach((t,i)=>{
+    const x=PAD+28+i*((W-PAD*2-56)/3);
+    const w=(W-PAD*2-56)/3-18;
+    ctx.fillStyle=t.glow; roundRect(ctx,x,y+24,w,176,22); ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,0.07)'; roundRect(ctx,x,y+24,w,176,22); ctx.stroke();
+    ctx.textAlign='center'; ctx.fillStyle='#fff'; ctx.font='42px sans-serif'; ctx.fillText(t.icon,x+w/2,y+76);
+    ctx.fillStyle=faint; ctx.font='700 18px sans-serif'; ctx.fillText(t.label,x+w/2,y+106);
+    ctx.fillStyle=textColor; ctx.font='700 30px sans-serif'; ctx.fillText(t.value,x+w/2,y+144);
+    ctx.fillStyle=subColor; ctx.font='600 20px sans-serif'; ctx.fillText(t.sub,x+w/2,y+172);
+  });
+  y += 224 + CARD_GAP;
+
+  drawCard(PAD,y,W-PAD*2,390,lineColor,'rgba(10,13,26,0.56)');
+  ctx.textAlign='left'; ctx.fillStyle=textColor; ctx.font='700 28px sans-serif'; ctx.fillText('本質グラフ（5軸）',PAD+28,y+44);
+  const srcCanvas=document.getElementById('radarCanvas');
+  if(srcCanvas){ ctx.drawImage(srcCanvas,PAD+70,y+82,320,320); }
+  const labels=['才能','感情','社交','意志','直感'];
+  labels.forEach((lbl,i)=>{
+    const boxY=y+92+i*56;
+    drawCard(PAD+440,boxY,W-PAD*2-468,44,'rgba(255,255,255,0.05)','rgba(255,255,255,0.03)');
+    ctx.textAlign='left'; ctx.fillStyle=subColor; ctx.font='600 20px sans-serif'; ctx.fillText(lbl,PAD+460,boxY+28);
+    ctx.textAlign='right'; ctx.fillStyle='#c4b5fd'; ctx.font='700 24px sans-serif'; ctx.fillText(String(d.radarVals[i]),W-PAD-26,boxY+29); ctx.textAlign='left';
+  });
+  y += 390 + CARD_GAP;
+
+  const detailSections = sections.filter(s=>['detail','reading','counts','footer'].includes(s.type));
+  for(const s of detailSections){
+    if(s.type==='detail' || s.type==='reading'){
+      drawCard(PAD,y,W-PAD*2,s.h,lineColor,'rgba(10,13,26,0.58)');
+      ctx.textAlign='left';
+      ctx.fillStyle=textColor; ctx.font='700 28px sans-serif'; ctx.fillText((s.icon?`${s.icon} `:'') + s.title,PAD+28,y+46);
+      fillTextWrapped(s.body,PAD+28,y+88,W-PAD*2-56,33,subColor,'500 22px sans-serif');
+      if(s.chips){
+        let chx=PAD+28; const chy=y+s.h-62;
+        s.chips.forEach((t,idx)=>{ chx += chip(chx,chy,'◎ '+t,idx===0?'#fcd34d':'#e9d5ff',idx===0?'rgba(245,158,11,0.12)':'rgba(168,85,247,0.10)',idx===0?'rgba(245,158,11,0.26)':'rgba(168,85,247,0.22)') + 12; });
+      }
+      y += s.h + CARD_GAP;
+    } else if(s.type==='counts'){
+      drawCard(PAD,y,W-PAD*2,240,lineColor,'rgba(10,13,26,0.58)');
+      ctx.fillStyle=textColor; ctx.font='700 28px sans-serif'; ctx.fillText('選択した価値観バランス',PAD+28,y+46);
+      const items=Object.entries(d.biz.counts);
+      items.forEach(([k,v],i)=>{
+        const bx=PAD+28+(i%2)*470; const by=y+74+Math.floor(i/2)*72;
+        drawCard(bx,by,430,54,'rgba(255,255,255,0.05)','rgba(255,255,255,0.03)');
+        ctx.fillStyle=subColor; ctx.font='600 20px sans-serif'; ctx.fillText(`${k} / ${VALUE_META[k].name}`,bx+18,by+33);
+        ctx.textAlign='right'; ctx.fillStyle='#fcd34d'; ctx.font='700 20px sans-serif'; ctx.fillText(`選択数 ${v}`,bx+412,by+33); ctx.textAlign='left';
+      });
+      y += 240 + CARD_GAP;
+    } else if(s.type==='footer'){
+      ctx.textAlign='center';
+      ctx.fillStyle='rgba(255,255,255,0.32)'; ctx.font='600 20px sans-serif'; ctx.fillText('生年月日：' + d.y + '年' + d.m + '月' + d.d + '日 / 性別：' + d.sex, W/2, y+40);
+      ctx.fillStyle='rgba(255,255,255,0.24)'; ctx.font='600 18px sans-serif'; ctx.fillText('質問回答：Q1 ' + (d.answers.q1||'-') + '・Q2 ' + (d.answers.q2||'-') + '・Q3 ' + (d.answers.q3||'-'), W/2, y+72);
+      ctx.fillStyle='rgba(168,85,247,0.62)'; ctx.font='700 18px sans-serif'; ctx.fillText('powered by 宇宙三命鑑定 × ビジネス戦闘タイプ診断',W/2,y+100);
+      y += 110 + CARD_GAP;
+    }
+  }
+
+  cardDataURL = canvas.toDataURL('image/png');
+  const preview = document.getElementById('savePreviewWrap');
+  preview.innerHTML = `<img src="${cardDataURL}" alt="鑑定結果カード" style="width:100%;border-radius:14px;">`;
+  document.getElementById('saveDownloadBtn').disabled = false;
+}
+
+// roundRect ヘルパー
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function downloadCard() {
+  if (!cardDataURL) return;
+  const a = document.createElement('a');
+  const name = myData ? myData.name : 'result';
+  a.download = '宇宙三命鑑定_本質結果_' + name + '.png';
+  a.href = cardDataURL;
+  a.click();
+  // トースト表示
+  const t = document.getElementById('toast');
+  t.textContent = '📸 本質結果を画像保存しました！';
+  t.classList.add('show');
+  setTimeout(() => { t.classList.remove('show'); t.textContent = '📋 コピーしました！'; }, 2500);
+  closeSaveModal();
+}
+
+
+
+// ============================================================
+// SPECIAL FEATURES DATA
+// ============================================================
+
+// ① 前世占い データ
+const PAST_LIVES = [
+  { era:'古代エジプト', role:'神殿の神官・巫女', emoji:'🏛️',
+    desc:'かつてあなたは神と人の間に立つ神聖な存在でした。神殿に仕え、宇宙の真理を読み解き、民を導く使命を担っていました。その深い霊的知恵は現世でも直感力・洞察力として受け継がれています。',
+    karma:'今世の使命は「知恵を分かち合うこと」。直感を信頼し、周囲を照らす存在になることで前世のカルマが昇華されます。',
+    traits:['深い直感力','霊的感受性','神秘への親和性','指導力'],
+    color:'#f59e0b', grad:'linear-gradient(135deg,rgba(245,158,11,.15),rgba(217,119,6,.08))' },
+  { era:'平安時代・日本', role:'宮廷歌人・雅楽師', emoji:'🎋',
+    desc:'あなたは美と詩の世界に生きていました。言葉に魂を宿し、音楽で宮廷を彩り、人々の心を動かしていました。その感受性と表現への渇望は今世でも創造力・芸術センスとして息づいています。',
+    karma:'今世の使命は「美を創り出すこと」。感性を磨き、表現を恐れずに世界に美をもたらすことがあなたの宿命です。',
+    traits:['豊かな感受性','芸術的才能','言葉の力','美の追求'],
+    color:'#ec4899', grad:'linear-gradient(135deg,rgba(236,72,153,.15),rgba(219,39,119,.08))' },
+  { era:'中世ヨーロッパ', role:'旅する錬金術師・探求者', emoji:'⚗️',
+    desc:'あなたは真理を求めて世界を旅した探求者でした。物質と精神の秘密を解き明かすべく、禁断の知識にも踏み込んだ勇敢な魂の持ち主。その探求心は今世でも好奇心・革新力として生き続けています。',
+    karma:'今世の使命は「変容をもたらすこと」。古い常識を疑い、新しい可能性を切り開くことがあなたに課された使命です。',
+    traits:['旺盛な探求心','変革への情熱','論理的思考','孤独な強さ'],
+    color:'#8b5cf6', grad:'linear-gradient(135deg,rgba(139,92,246,.15),rgba(109,40,217,.08))' },
+  { era:'大航海時代', role:'海賊船長・冒険家', emoji:'⚓',
+    desc:'あなたは荒波を越えて未知の地を目指した冒険家でした。自由を何より愛し、仲間を率いて果てなき海へ乗り出した魂。その行動力と自由への渇望は今世でも開拓精神・リーダーシップとして輝いています。',
+    karma:'今世の使命は「新しい地平を開くこと」。安全地帯から一歩踏み出すことで、あなたの前世の力が完全に目覚めます。',
+    traits:['無限の行動力','自由への意志','統率力','挑戦精神'],
+    color:'#06b6d4', grad:'linear-gradient(135deg,rgba(6,182,212,.15),rgba(14,116,144,.08))' },
+  { era:'古代中国', role:'道士・仙人', emoji:'☯️',
+    desc:'あなたは山奥で宇宙の理を極めた仙人でした。陰陽五行の深奥を体得し、気の流れを操る神秘の力を持っていました。その宇宙との繋がりは今世でも精神力・直感・五行への共鳴として現れています。',
+    karma:'今世の使命は「調和をもたらすこと」。自他のバランスを整え、世界に平和をもたらすことがあなたの前世からの使命です。',
+    traits:['深い精神性','宇宙との調和','五行の感覚','内なる平和'],
+    color:'#22c55e', grad:'linear-gradient(135deg,rgba(34,197,94,.15),rgba(21,128,61,.08))' },
+  { era:'古代ギリシャ', role:'哲学者・数学者', emoji:'🏺',
+    desc:'あなたはアテナイの街で真理を問い続けた哲学者でした。万物の本質を追求し、知の探求こそが魂の喜びと信じていました。その論理力と知への情熱は今世でも学問的才能・洞察力として脈づいています。',
+    karma:'今世の使命は「真理を伝えること」。知識を独占せず、周囲に惜しみなく分かち合うことでカルマが解放されます。',
+    traits:['鋭い論理力','真理への情熱','弁証の才','高潔な精神'],
+    color:'#a855f7', grad:'linear-gradient(135deg,rgba(168,85,247,.15),rgba(126,34,206,.08))' },
+];
+
+// ② RPGクラスデータ
+const RPG_CLASSES = [
+  { cls:'聖剣士',    emoji:'⚔️', color:'#ef4444',
+    desc:'剣と信念で世界を守護する至高の戦士。圧倒的な攻撃力と不屈の精神で、どんな逆境も乗り越える。',
+    skills:['覇王断剣斬（全体攻撃）','不屈の魂（瀕死時攻撃力2倍）','天命覚醒（真の力を解放）'],
+    stats:{力:95, 守:80, 魔:45, 速:75, 運:70} },
+  { cls:'大魔道士',  emoji:'🔮', color:'#8b5cf6',
+    desc:'宇宙の魔力を操る神秘の術師。膨大な魔法力で世界の理を書き換える力を持つ。',
+    skills:['宇宙崩壊魔法（最強魔法）','時空歪曲（行動回数増加）','魂の封印（即死魔法）'],
+    stats:{力:40, 守:55, 魔:99, 速:70, 運:80} },
+  { cls:'龍騎士',    emoji:'🐉', color:'#f59e0b',
+    desc:'龍の力を宿した最強の騎士。空を駆け、炎を操り、全ての敵を圧倒する。',
+    skills:['龍炎斬り（火属性特大ダメ）','天翔ける翼（先制攻撃）','龍神憑依（全能力MAX）'],
+    stats:{力:90, 守:85, 魔:75, 速:88, 運:75} },
+  { cls:'影の刺客',  emoji:'🗡️', color:'#374151',
+    desc:'闇に潜み、一瞬で急所を突く暗殺者。誰も気づかないうちに勝負を決める。',
+    skills:['暗殺（先制・即死効果）','影分身（回避率大幅UP）','毒霧散布（全体継続ダメ）'],
+    stats:{力:85, 守:60, 魔:65, 速:99, 運:85} },
+  { cls:'賢者',      emoji:'📜', color:'#06b6d4',
+    desc:'万物の知識を極めた究極の知者。あらゆる魔法と技術を駆使し、戦局を完全支配する。',
+    skills:['全知全能（全魔法使用可）','予知夢（敵の行動を予読）','真理の言葉（全状態異常解除）'],
+    stats:{力:55, 守:70, 魔:95, 速:75, 運:95} },
+  { cls:'聖女神官',  emoji:'✨', color:'#ec4899',
+    desc:'女神の加護を受けた聖なる癒し手。仲間を完全回復し、奇跡で不可能を可能にする。',
+    skills:['女神の奇跡（完全回復）','聖なる盾（ダメ無効化）','祈りの光（全体蘇生）'],
+    stats:{力:50, 守:88, 魔:90, 速:65, 運:99} },
+  { cls:'召喚師',    emoji:'🌟', color:'#10b981',
+    desc:'伝説の精霊と契約を結んだ召喚士。無限の精霊たちの力を借りて戦場を支配する。',
+    skills:['天地召喚（最強精霊呼び出し）','精霊の加護（全体バフ）','自然の怒り（全体特大ダメ）'],
+    stats:{力:65, 守:75, 魔:88, 速:72, 運:90} },
+  { cls:'天空勇者',  emoji:'🦅', color:'#a855f7',
+    desc:'天命を受けし伝説の勇者。正義の力と無限の潜在能力で世界を救う運命を持つ。',
+    skills:['天命解放（最大HPを超えた攻撃）','勇者の誓い（全仲間の力を解放）','奇跡の一撃（確率で即勝利）'],
+    stats:{力:88, 守:88, 魔:88, 速:88, 運:88} },
+];
+
+// ③ 才能覚醒データ
+const AWAKEN_DATA = {
+  木:{ talent:'生命創造の才能', hidden:'変革と再生の力',
+       desc:'木の気を持つあなたの才能は「成長させること」。人・組織・アイデアを育て、大きく発展させる力が眠っています。未覚醒のままでは頑固さや完璧主義として現れますが、覚醒すると圧倒的な成長促進力となります。',
+       key:'「新しい挑戦」を毎月1つ行うことで才能が開花。特に春（3〜5月）に行動すると覚醒が加速します。',
+       abilities:['天才的育成力','革命的変革力','圧倒的正義感','未来を見通す先見性'],
+       awaken_lv:3 },
+  火:{ talent:'魂の点火力', hidden:'奇跡を起こす情熱',
+       desc:'火の気を持つあなたの才能は「人を動かすこと」。言葉・行動・存在そのもので人の魂に火を灯す力があります。未覚醒では感情的・衝動的として現れますが、覚醒すると天才的カリスマ力となります。',
+       key:'「情熱を人前で見せること」で才能が開花。恐れずに自分の熱量を表現するたびに覚醒度が上がります。',
+       abilities:['神がかりカリスマ','奇跡の情熱力','人の心を動かす言葉','炎の創造力'],
+       awaken_lv:4 },
+  土:{ talent:'大地の安定力', hidden:'万物を引き寄せる磁場',
+       desc:'土の気を持つあなたの才能は「守り育てること」。圧倒的な安心感で人を包み込み、安定した基盤を作る力があります。未覚醒では保守的・鈍重として現れますが、覚醒すると揺るぎない守護力となります。',
+       key:'「人のために尽くす場面」を作ることで才能が開花。誰かのサポートをするたびに覚醒が深まります。',
+       abilities:['絶対的安定感','引き寄せの磁場','母なる包容力','千年の忍耐力'],
+       awaken_lv:2 },
+  金:{ talent:'金剛不壊の完璧力', hidden:'宇宙を切り開く刃',
+       desc:'金の気を持つあなたの才能は「完成させること」。どんな荒削りなものも磨き上げ、完璧な形に仕上げる力があります。未覚醒では完璧主義・批判的として現れますが、覚醒すると最高の審美眼と実現力となります。',
+       key:'「完成品を世に出すこと」で才能が開花。アウトプットするたびに覚醒が進みます。完璧を待たず出すことが鍵。',
+       abilities:['超精密な判断力','黄金の審美眼','完成への執念','鋼鉄の意志力'],
+       awaken_lv:3 },
+  水:{ talent:'深海の知恵', hidden:'宇宙を流れる直感',
+       desc:'水の気を持つあなたの才能は「流れを読むこと」。状況・人心・時代の流れを瞬時に読み解き、最適な道を選ぶ力があります。未覚醒では優柔不断・流されやすいとして現れますが、覚醒すると神がかりの直感力となります。',
+       key:'「静かな瞑想や一人の時間」を大切にすることで才能が開花。深く考えるほど覚醒が進みます。',
+       abilities:['超越的直感力','水面を読む洞察','柔軟な適応力','深海の神秘知識'],
+       awaken_lv:4 },
+};
+
+// ④ 宇宙エネルギーデータ
+const COSMIC_DATA = [
+  { energy:'太陽エネルギー',  planet:'☀️ 太陽', freq:'528Hz（DNA修復）', color:'#f59e0b',
+    desc:'あなたは生命の源・太陽のエネルギーを宿しています。光と熱を放ち、周囲を照らす存在。強い生命力と活力が最大の武器です。',
+    element:'光', power:'創造と再生', weakness:'燃え尽きやすい', chakra:'太陽神経叢チャクラ（黄色）',
+    message:'今あなたに必要なのは「自分自身を輝かせること」。太陽は自ら光を作り出します。誰かのために輝くのではなく、あなた自身が輝くことで世界が明るくなります。' },
+  { energy:'月のエネルギー',  planet:'🌙 月', freq:'432Hz（自然調和）', color:'#a5b4fc',
+    desc:'あなたは月の満ち欠けのように変化と流れを司るエネルギーを持ちます。感情・直感・潜在意識に深く繋がる神秘的な存在です。',
+    element:'水', power:'感情と直感', weakness:'感情の波', chakra:'眉間チャクラ（紫）',
+    message:'月は太陽の光を受け取り、柔らかく世界を照らします。あなたの感受性は才能。感情を恐れず、その深さを力に変えてください。' },
+  { energy:'火星エネルギー',  planet:'🔴 火星', freq:'639Hz（関係調和）', color:'#ef4444',
+    desc:'あなたは闘いと情熱の星・火星のエネルギーに共鳴します。逆境に燃え、挑戦を愛し、圧倒的な行動力で道を切り開きます。',
+    element:'火', power:'情熱と勝負', weakness:'短気・衝動', chakra:'ルートチャクラ（赤）',
+    message:'火星の戦士よ、戦うべき相手は常に「昨日の自分」です。情熱を正しく向けることで、あなたの力は世界を変えます。' },
+  { energy:'木星エネルギー',  planet:'🟠 木星', freq:'741Hz（直感覚醒）', color:'#f97316',
+    desc:'あなたは拡大と豊かさの星・木星のエネルギーを帯びています。どこにいても場を大きく広げ、豊かさをもたらす幸運の持ち主です。',
+    element:'風', power:'拡大と豊かさ', weakness:'過信・拡大しすぎ', chakra:'喉チャクラ（青）',
+    message:'木星はすべてを大きくします。あなたの夢も大きく描くほど現実化します。今こそビジョンをスケールアップする時です。' },
+  { energy:'土星エネルギー',  planet:'🪐 土星', freq:'396Hz（障害解放）', color:'#6b7280',
+    desc:'あなたは試練と完成の星・土星のエネルギーを持ちます。困難を糧に成長し、長い時間をかけて揺るぎない実力を積み上げます。',
+    element:'土', power:'忍耐と完成', weakness:'完璧主義・孤立', chakra:'ルートチャクラ（黒）',
+    message:'土星の試練は祝福の変装です。今あなたが感じる困難は、揺るぎない実力を作るための最高の材料です。続けてください。' },
+  { energy:'水星エネルギー',  planet:'💫 水星', freq:'852Hz（高次元覚醒）', color:'#06b6d4',
+    desc:'あなたは知性とコミュニケーションの星・水星のエネルギーに満ちています。情報処理・言語・繋がりで世界を動かす力があります。',
+    element:'風', power:'知性と繋がり', weakness:'過剰思考・緊張', chakra:'眉間チャクラ（水色）',
+    message:'水星はメッセンジャーです。あなたの言葉・アイデア・繋がりが世界を変える力を持っています。声を上げる時が来ています。' },
+];
+
+// ⑤ 運命の人データ
+const DESTINY_TYPES = {
+  木:{ type:'成長を共に喜べる人', emoji:'🌱', color:'#22c55e',
+      desc:'あなたの運命の人は「共に成長できる相手」。お互いの夢を応援し、刺激し合いながら上を目指す関係が最高の縁。',
+      feature:'向上心が高く、変化を恐れない人',
+      meet:'「学びの場・勉強会・新しいチャレンジの現場」で出会う可能性が高い',
+      timing:'春（3〜5月）・子年・卯年に縁が強まる',
+      keyword:['成長','好奇心','向上心','誠実さ'],
+      zodiac:'水・火の五行を持つ人との縁が特に強い' },
+  火:{ type:'情熱を分かち合える人', emoji:'🔥', color:'#ef4444',
+      desc:'あなたの運命の人は「同じ熱量で燃える相手」。二人でいると自然に会話が弾み、夢や情熱について語り合える関係。',
+      feature:'明るく社交的で、感情表現が豊かな人',
+      meet:'「パーティー・イベント・情熱的な現場」で出会う可能性が高い',
+      timing:'夏（6〜8月）・午年・寅年に縁が開花',
+      keyword:['情熱','明るさ','感情の豊かさ','行動力'],
+      zodiac:'木・土の五行を持つ人と強く共鳴する' },
+  土:{ type:'深い信頼で繋がれる人', emoji:'🌍', color:'#d97706',
+      desc:'あなたの運命の人は「じっくり絆を深められる相手」。最初はゆっくりでも、時間をかけて揺るぎない信頼関係を育める縁。',
+      feature:'誠実で安定感があり、長期的な関係を大切にする人',
+      meet:'「職場・地元・長い時間を共有する場所」で出会う可能性が高い',
+      timing:'土用（各季節の変わり目）・戌年・丑年に縁が強まる',
+      keyword:['誠実','安定','信頼','地道な努力'],
+      zodiac:'火・金の五行を持つ人と相性抜群' },
+  金:{ type:'上質な美意識を共有できる人', emoji:'💎', color:'#9ca3af',
+      desc:'あなたの運命の人は「同じ審美眼を持つ相手」。外見だけでなく内面の美しさ・センス・品格に惹かれ合う特別な縁。',
+      feature:'洗練された価値観を持ち、自己磨きに熱心な人',
+      meet:'「文化的な場・美術館・上質な環境」で出会う可能性が高い',
+      timing:'秋（9〜11月）・申年・酉年に縁が輝く',
+      keyword:['品格','洗練','完璧への追求','美意識'],
+      zodiac:'土・水の五行を持つ人と深い縁がある' },
+  水:{ type:'魂の深みで繋がれる人', emoji:'🌊', color:'#3b82f6',
+      desc:'あなたの運命の人は「魂の言葉が通じる相手」。多くを語らなくても深いところで理解し合える、魂のつながりを持てる縁。',
+      feature:'直感力が高く、感受性が豊かで深みのある人',
+      meet:'「静かな場所・自然の中・偶然の出会い」で縁が結ばれやすい',
+      timing:'冬（12〜2月）・子年・亥年に縁が深まる',
+      keyword:['直感','感受性','深さ','神秘'],
+      zodiac:'金・木の五行を持つ人と宿命的な縁を持つ' },
+};
+
+// ⑥ 性格裏タイプデータ
+const SHADOW_DATA = {
+  チーター:{ shadow:'隠れた孤独感', inner:'実は繊細で傷つきやすい心',
+      desc:'スピードと自信の裏に、深い孤独感が隠れています。強そうに見えるあなたですが、実は「本当に理解してくれる人」を探し続けています。',
+      trigger:'急かされる・否定される・一人にされる',
+      heal:'「ゆっくりした時間」と「深い対話」が魂を癒します。',
+      dark_trait:'支配欲・過剰な競争心', light_trait:'その孤独が共感力の源になる' },
+  たぬき:{ shadow:'見捨てられ不安', inner:'深層に眠る自己不信',
+      desc:'明るく変化自在な外面の奥に、「本当の自分を見せたら嫌われるかも」という深い不安が潜んでいます。その不安こそが適応力の源です。',
+      trigger:'無視される・孤立感・否定される',
+      heal:'「そのままの自分でいい」という体験を重ねることで内側が安定します。',
+      dark_trait:'八方美人・自分を見失う', light_trait:'不安が共感力と適応力に変わる' },
+  こじか:{ shadow:'過剰な自己否定', inner:'完璧でなければという恐れ',
+      desc:'純粋で繊細な外見の裏に、自己否定の声が響いています。「もっと頑張らなければ」というプレッシャーを自らに課し続けています。',
+      trigger:'失敗・批判・期待に応えられない時',
+      heal:'「不完全な自分」を愛することが最大の成長。失敗を宝として扱って。',
+      dark_trait:'自己犠牲・完璧主義の暴走', light_trait:'繊細さが深い美意識と共感力になる' },
+  コアラ:{ shadow:'変化への深い恐れ', inner:'安全への強迫的な渇望',
+      desc:'マイペースで落ち着いた外面の奥に、「変化によって全てを失うかも」という根深い恐れが潜んでいます。',
+      trigger:'急な変化・不安定な環境・コントロール外の出来事',
+      heal:'「小さな変化」に自ら踏み出すことで恐れが溶けていきます。',
+      dark_trait:'頑固・引きこもり傾向', light_trait:'安定力が周囲の安心感の源になる' },
+  '黒ひょう':{ shadow:'親密さへの恐怖', inner:'傷つくことへの深い警戒心',
+      desc:'神秘的で近づきがたいオーラの奥に、「深く愛したら傷つく」という恐れが隠れています。距離を置くのは自己防衛です。',
+      trigger:'裏切り・信頼を壊される・脆弱性を見せる場面',
+      heal:'信頼できる一人に少しずつ心を開くことで魂が解放されます。',
+      dark_trait:'孤立・感情の封鎖', light_trait:'その深さが唯一無二の洞察力になる' },
+  虎:{ shadow:'支配されることへの恐怖', inner:'弱さを見せられない鎧',
+      desc:'勇敢なリーダーの裏に「弱みを見せると負ける」という信念があります。常に強くあろうとする緊張が内側に蓄積しています。',
+      trigger:'頼ることを強いられる・弱さを見られる・負ける',
+      heal:'「強さの中に弱さを認める」ことが真の力を引き出す鍵です。',
+      dark_trait:'支配欲・認められない弱さ', light_trait:'恐れを超えた強さが真のリーダーを作る' },
+  ひつじ:{ shadow:'自分の意見を言えない', inner:'対立を恐れる深層心理',
+      desc:'優しさと協調性の裏に、「自分の意見を言ったら関係が壊れる」という恐れが潜んでいます。',
+      trigger:'意見の対立・自己主張が必要な場面・拒絶',
+      heal:'「小さなNoを言う練習」から始めることで自分軸が育まれます。',
+      dark_trait:'自己犠牲・感情の抑圧', light_trait:'その共感力が深い愛と繋がりの才能になる' },
+  狼:{ shadow:'孤立への深い恐れ', inner:'群れと孤独の間の葛藤',
+      desc:'忠誠心と野生の表面の奥に、「仲間に必要とされなくなったら」という深い孤独への恐れが隠れています。',
+      trigger:'裏切り・仲間外れ・孤立した状況',
+      heal:'「自分一人でも完結できる強さ」を育てることで孤立恐怖が溶けます。',
+      dark_trait:'過剰依存・嫉妬', light_trait:'深い絆への渇望が最高の忠誠心になる' },
+  猿:{ shadow:'愚かに見られる恐怖', inner:'知性への強迫的なこだわり',
+      desc:'頭脳明晰な外面の奥に「馬鹿にされたくない」という深い恐れがあります。常に賢くあろうとする緊張が休めない原因です。',
+      trigger:'間違い・無知を暴露される・馬鹿にされる',
+      heal:'「知らないことを楽しむ姿勢」で内側の緊張が解放されます。',
+      dark_trait:'マウンティング・不誠実な賢さ', light_trait:'知への情熱が人を豊かにする力になる' },
+  ゾウ:{ shadow:'忘れられることへの恐れ', inner:'存在価値への根深い問い',
+      desc:'安定と包容力の裏に「自分は必要とされているのか」という根深い問いがあります。記憶力の高さは愛情の裏返しです。',
+      trigger:'感謝されない・無視される・貢献が見えない',
+      heal:'「自分のために自分を大切にする」ことが存在価値を育てます。',
+      dark_trait:'執着・過去に囚われる', light_trait:'深い記憶と絆への渇望が愛の深さになる' },
+  ライオン:{ shadow:'王座から降りる恐怖', inner:'プライドの奥の脆さ',
+      desc:'カリスマと誇りの奥に「見下されること・権威を失うこと」への強い恐れがあります。プライドは深い傷への盾です。',
+      trigger:'権威を否定される・負ける・恥をかかされる',
+      heal:'「人間としての等身大の自分」を受け入れることで真の王者になれます。',
+      dark_trait:'傲慢・支配欲', light_trait:'誇りが人々を鼓舞するカリスマになる' },
+  ペガサス:{ shadow:'現実に縛られる恐怖', inner:'夢と現実の間の苦しみ',
+      desc:'夢とロマンの翼の裏に「現実に落とされること」への深い恐れがあります。理想が高いほど、現実とのギャップに苦しみます。',
+      trigger:'夢を否定される・現実的であることを強いられる',
+      heal:'「小さな夢を現実にする成功体験」が翼を強くします。',
+      dark_trait:'逃避・非現実的', light_trait:'夢見る力が世界を変えるビジョンになる' },
+};
+
+// ============================================================
+// SPECIAL FEATURES BUILDER
+// ============================================================
+function buildSpecial(ps, gogyo, main, surf, dg, shusei, shuseiInfo, name, y, m, d) {
+  buildPastLife(ps, gogyo, dg, shusei, y, m, d);
+  buildRPG(main, dg, shusei, shuseiInfo);
+  buildAwaken(dg, shuseiInfo, gogyo);
+  buildCosmic(ps, y, m, d, dg);
+  buildDestiny(dg);
+  buildShadow(main, surf, dg);
+}
+
+// ① 前世占い
+function buildPastLife(ps, gogyo, dg, shusei, y, m, d) {
+  const seed = (y * 7 + m * 13 + d * 3 + ps.day.ki * 5 + ps.year.si) % PAST_LIVES.length;
+  const pl = PAST_LIVES[Math.abs(seed)];
+  document.getElementById('sp-pastlife').innerHTML = `
+    <div class="sp-card-head">
+      <div class="sp-card-emoji">${pl.emoji}</div>
+      <div>
+        <div class="sp-card-label">前世の記憶</div>
+        <div class="sp-card-name"><span>${pl.era}</span></div>
+      </div>
+    </div>
+    <div style="display:inline-block;padding:4px 14px;border-radius:99px;background:${pl.color}22;border:1px solid ${pl.color}55;color:${pl.color};font-size:.78rem;font-weight:700;margin-bottom:10px;">${pl.role}</div>
+    <div class="sp-card-sub">${pl.desc}</div>
+    <div class="sp-divider"></div>
+    <div style="font-size:.72rem;color:rgba(255,255,255,.45);font-weight:700;margin-bottom:6px;">🌀 今世のカルマ</div>
+    <div class="sp-card-sub" style="color:rgba(255,255,255,.7);">${pl.karma}</div>
+    <div class="sp-badge-row">
+      ${pl.traits.map(t => `<span class="sp-badge sp-badge-purple">${t}</span>`).join('')}
+    </div>`;
+}
+
+// ② RPGタイプ
+function buildRPG(main, dg, shusei, shuseiInfo) {
+  const idx = (['木','火','土','金','水'].indexOf(dg) * 2 + ['比肩','劫財','食神','傷官','偏財','正財','七殺','正官','偏印','印綬'].indexOf(shusei)) % RPG_CLASSES.length;
+  const rpg = RPG_CLASSES[Math.abs(idx % RPG_CLASSES.length)];
+  const statKeys = Object.keys(rpg.stats);
+  document.getElementById('sp-rpg').innerHTML = `
+    <div class="sp-card-head">
+      <div class="sp-card-emoji">${rpg.emoji}</div>
+      <div>
+        <div class="sp-card-label">あなたのRPGクラス</div>
+        <div class="sp-card-name"><span>${rpg.cls}</span></div>
+      </div>
+    </div>
+    <div class="sp-rpg-class-badge" style="background:${rpg.color}22;border:1px solid ${rpg.color}55;color:${rpg.color};">
+      ${main.emoji} ${main.animal} × ${rpg.cls}
+    </div>
+    <div class="sp-card-sub">${rpg.desc}</div>
+    <div class="sp-divider"></div>
+    <div style="font-size:.72rem;color:rgba(255,255,255,.45);font-weight:700;margin-bottom:8px;">⚡ 特殊スキル</div>
+    <ul class="sp-skill-list">${rpg.skills.map(s => `<li>${s}</li>`).join('')}</ul>
+    <div class="sp-divider"></div>
+    <div style="font-size:.72rem;color:rgba(255,255,255,.45);font-weight:700;margin-bottom:8px;">📊 ステータス</div>
+    ${statKeys.map(k => `
+    <div class="sp-bar-row">
+      <div class="sp-bar-lbl">${k}</div>
+      <div class="sp-bar-bg"><div class="sp-bar-fill" style="width:0%;background:linear-gradient(90deg,${rpg.color},${rpg.color}99);" data-w="${rpg.stats[k]}"></div></div>
+      <div class="sp-bar-num">${rpg.stats[k]}</div>
+    </div>`).join('')}`;
+  setTimeout(()=>document.querySelectorAll('#sp-rpg .sp-bar-fill').forEach(el=>el.style.width=el.dataset.w+'%'),400);
+}
+
+// ③ 才能覚醒
+function buildAwaken(dg, shuseiInfo, gogyo) {
+  const aw = AWAKEN_DATA[dg];
+  const lv = aw.awaken_lv;
+  const pct = [0,20,40,65,85,100][lv];
+  const stars = '★'.repeat(lv) + '☆'.repeat(5-lv);
+  document.getElementById('sp-awaken').innerHTML = `
+    <div class="sp-card-head">
+      <div class="sp-card-emoji">💎</div>
+      <div>
+        <div class="sp-card-label">覚醒レベル ${lv}/5</div>
+        <div class="sp-card-name"><span>${aw.talent}</span></div>
+      </div>
+    </div>
+    <div class="sp-awaken-meter">
+      <div class="sp-awaken-lv">${stars}</div>
+      <div class="sp-awaken-lbl">覚醒度 ${pct}%</div>
+      <div class="sp-bar-bg" style="height:12px;border-radius:99px;">
+        <div class="sp-bar-fill" data-w="${pct}" style="width:0%;height:12px;background:linear-gradient(90deg,#f59e0b,#f97316,#ef4444);"></div>
+      </div>
+    </div>
+    <div class="sp-card-sub">${aw.desc}</div>
+    <div class="sp-divider"></div>
+    <div style="font-size:.72rem;color:rgba(255,255,255,.45);font-weight:700;margin-bottom:6px;">🗝️ 才能覚醒のカギ</div>
+    <div class="sp-card-sub" style="color:#fbbf24;">${aw.key}</div>
+    <div class="sp-divider"></div>
+    <div style="font-size:.72rem;color:rgba(255,255,255,.45);font-weight:700;margin-bottom:6px;">🌟 隠された能力</div>
+    <div class="sp-badge-row">
+      ${aw.abilities.map(a => `<span class="sp-badge sp-badge-gold">${a}</span>`).join('')}
+    </div>
+    <div style="margin-top:10px;font-size:.72rem;color:rgba(255,255,255,.45);">算命学主星「${shuseiInfo.name}」との融合才能：<span style="color:#c084fc;">${aw.hidden}</span></div>`;
+  setTimeout(()=>document.querySelectorAll('#sp-awaken .sp-bar-fill').forEach(el=>el.style.width=el.dataset.w+'%'),400);
+}
+
+// ④ 宇宙エネルギー診断
+function buildCosmic(ps, y, m, d, dg) {
+  const lifeNum = (y.toString().split('').concat(m.toString().split('')).concat(d.toString().split(''))).reduce((a,b)=>a+parseInt(b),0);
+  const reduced = lifeNum % COSMIC_DATA.length;
+  const co = COSMIC_DATA[reduced];
+  const planets = [
+    {e:'☀️',n:'太陽',v:Math.round(40+ps.day.ki*5.5)},
+    {e:'🌙',n:'月',  v:Math.round(35+ps.day.si*4.2)},
+    {e:'🪐',n:'土星', v:Math.round(30+ps.year.ki*6)},
+    {e:'🔴',n:'火星', v:Math.round(25+ps.month.ki*5)},
+  ];
+  document.getElementById('sp-cosmic').innerHTML = `
+    <div class="sp-card-head">
+      <div class="sp-card-emoji">${co.planet.split(' ')[0]}</div>
+      <div>
+        <div class="sp-card-label">主要エネルギー</div>
+        <div class="sp-card-name"><span>${co.energy}</span></div>
+      </div>
+    </div>
+    <div class="sp-badge-row" style="margin-bottom:10px;">
+      <span class="sp-badge sp-badge-cyan">周波数: ${co.freq}</span>
+      <span class="sp-badge sp-badge-purple">元素: ${co.element}</span>
+      <span class="sp-badge sp-badge-gold">力: ${co.power}</span>
+    </div>
+    <div class="sp-card-sub">${co.desc}</div>
+    <div class="sp-divider"></div>
+    <div style="font-size:.72rem;color:rgba(255,255,255,.45);font-weight:700;margin-bottom:8px;">🪐 惑星エネルギー分布</div>
+    <div class="sp-planet-row">
+      ${planets.map(p=>`<div class="sp-planet"><span class="sp-planet-emoji">${p.e}</span><div class="sp-planet-name">${p.n}</div><div class="sp-planet-val">${Math.min(99,p.v)}</div></div>`).join('')}
+    </div>
+    <div class="sp-divider"></div>
+    <div style="font-size:.72rem;color:rgba(255,255,255,.45);font-weight:700;margin-bottom:6px;">✨ チャクラ</div>
+    <div class="sp-card-sub" style="color:#a5b4fc;">${co.chakra}</div>
+    <div class="sp-divider"></div>
+    <div style="font-size:.72rem;color:rgba(255,255,255,.45);font-weight:700;margin-bottom:6px;">🌌 宇宙からのメッセージ</div>
+    <div class="sp-card-sub" style="color:rgba(255,255,255,.8);font-style:italic;">"${co.message}"</div>
+    <div class="sp-stats">
+      <div class="sp-stat"><div class="sp-stat-lbl">弱点</div><div class="sp-stat-val">${co.weakness}</div></div>
+      <div class="sp-stat"><div class="sp-stat-lbl">ライフパスナンバー</div><div class="sp-stat-val">${(lifeNum%9)||9}</div></div>
+    </div>`;
+}
+
+// ⑤ 運命の人タイプ
+function buildDestiny(dg) {
+  const dt = DESTINY_TYPES[dg];
+  document.getElementById('sp-destiny').innerHTML = `
+    <div class="sp-destiny-type">
+      <span class="sp-destiny-emoji">${dt.emoji}</span>
+      <div class="sp-destiny-name">${dt.type}</div>
+    </div>
+    <div class="sp-card-sub" style="margin-top:10px;">${dt.desc}</div>
+    <div class="sp-divider"></div>
+    <div class="sp-stats">
+      <div class="sp-stat"><div class="sp-stat-lbl">出会いの場所</div><div class="sp-stat-val" style="font-size:.75rem;">${dt.meet.replace(/「|」/g,'')}</div></div>
+      <div class="sp-stat"><div class="sp-stat-lbl">縁が強まる時期</div><div class="sp-stat-val" style="font-size:.75rem;">${dt.timing}</div></div>
+    </div>
+    <div class="sp-divider"></div>
+    <div style="font-size:.72rem;color:rgba(255,255,255,.45);font-weight:700;margin-bottom:6px;">💫 運命の人の特徴</div>
+    <div class="sp-card-sub" style="color:rgba(255,255,255,.75);">${dt.feature}</div>
+    <div class="sp-badge-row">
+      ${dt.keyword.map(k=>`<span class="sp-badge sp-badge-pink">${k}</span>`).join('')}
+    </div>
+    <div class="sp-divider"></div>
+    <div style="font-size:.72rem;color:rgba(255,255,255,.45);font-weight:700;margin-bottom:4px;">☯ 五行の縁</div>
+    <div class="sp-card-sub" style="color:#22d3ee;">${dt.zodiac}</div>`;
+}
+
+// ⑥ 性格裏タイプ
+function buildShadow(main, surf, dg) {
+  const sh = SHADOW_DATA[main.animal] || SHADOW_DATA['こじか'];
+  const sh2 = SHADOW_DATA[surf.animal] || null;
+  document.getElementById('sp-shadow').innerHTML = `
+    <div class="sp-card-head">
+      <div class="sp-card-emoji">🌑</div>
+      <div>
+        <div class="sp-card-label">あなたの影の自己</div>
+        <div class="sp-card-name"><span>${sh.inner}</span></div>
+      </div>
+    </div>
+    <div class="sp-shadow-card">
+      <div class="sp-shadow-title">🔍 ${main.animal}の闇の面</div>
+      <div class="sp-shadow-text">${sh.desc}</div>
+    </div>
+    <div class="sp-divider"></div>
+    <div class="sp-stats">
+      <div class="sp-stat"><div class="sp-stat-lbl">⚡ トリガー</div><div class="sp-stat-val" style="font-size:.72rem;">${sh.trigger}</div></div>
+      <div class="sp-stat"><div class="sp-stat-lbl">🌿 癒し方</div><div class="sp-stat-val" style="font-size:.72rem;">${sh.heal}</div></div>
+    </div>
+    <div class="sp-divider"></div>
+    <div style="font-size:.72rem;color:rgba(255,255,255,.45);font-weight:700;margin-bottom:6px;">🌑 影の特性 → ✨ 光への変容</div>
+    <div style="display:flex;gap:8px;flex-direction:column;">
+      <div style="display:flex;align-items:flex-start;gap:8px;">
+        <span style="color:#ef4444;font-size:.7rem;flex-shrink:0;margin-top:2px;">△ 影</span>
+        <div class="sp-card-sub" style="margin:0;">${sh.dark_trait}</div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:8px;">
+        <span style="color:#22c55e;font-size:.7rem;flex-shrink:0;margin-top:2px;">✦ 光</span>
+        <div class="sp-card-sub" style="margin:0;color:rgba(255,255,255,.8);">${sh.light_trait}</div>
+      </div>
+    </div>
+    ${sh2 ? `<div class="sp-divider"></div>
+    <div style="font-size:.72rem;color:rgba(255,255,255,.45);font-weight:700;margin-bottom:6px;">🎭 表の顔（${surf.animal}）との葛藤</div>
+    <div class="sp-shadow-card"><div class="sp-shadow-title">${surf.emoji} ${surf.animal}の隠れた影</div><div class="sp-shadow-text">${sh2.desc}</div></div>` : ''}
+    <div class="sp-badge-row" style="margin-top:10px;">
+      <span class="sp-badge sp-badge-purple">${sh.shadow}</span>
+      <span class="sp-badge sp-badge-green">癒し可能 ✓</span>
+    </div>`;
+}
+
+// init
+setSex('男');
+</script>
+</body>
+</html>
