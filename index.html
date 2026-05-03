@@ -341,14 +341,25 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:#fff;min-h
   text-align:center;
 }
 .save-modal-title{font-size:1.05rem;font-weight:900;color:#e8d5ff;margin-bottom:6px;}
-.save-modal-sub{font-size:.75rem;color:rgba(255,255,255,.45);margin-bottom:18px;}
+.save-modal-sub{font-size:.75rem;color:rgba(255,255,255,.45);margin-bottom:14px;}
+.save-part-tabs{display:flex;gap:10px;margin-bottom:12px;}
+.save-part-tab{
+  flex:1;padding:11px 10px;border-radius:12px;cursor:pointer;
+  border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);
+  color:rgba(255,255,255,.72);font-family:inherit;font-size:.84rem;font-weight:800;
+}
+.save-part-tab.on{
+  color:#fff;border-color:rgba(168,85,247,.45);
+  background:linear-gradient(135deg,rgba(168,85,247,.26),rgba(99,102,241,.18));
+  box-shadow:0 8px 24px rgba(99,102,241,.18);
+}
 .save-preview-wrap{
-  border-radius:16px;overflow:hidden;margin-bottom:16px;
+  border-radius:16px;overflow:auto;margin-bottom:16px;max-height:240px;
   border:1px solid rgba(255,255,255,.1);
   background:#080618;
 }
 .save-preview-wrap img{width:100%;display:block;}
-.save-modal-btns{display:flex;gap:10px;}
+.save-modal-btns{display:flex;gap:10px;align-items:center;}
 .save-modal-dl{
   flex:1;padding:13px;border-radius:12px;border:none;cursor:pointer;
   background:linear-gradient(135deg,#a855f7,#6366f1);
@@ -359,7 +370,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:#fff;min-h
   background:transparent;color:rgba(255,255,255,.6);
   font-family:inherit;font-size:.88rem;cursor:pointer;
 }
-.save-generating{color:rgba(255,255,255,.5);font-size:.8rem;padding:16px;text-align:center;}
+.save-generating{color:rgba(255,255,255,.5);font-size:.8rem;padding:20px;text-align:center;}
 
 /* ======== CARD CANVAS (hidden) ======== */
 #resultCardCanvas{display:none;}
@@ -409,13 +420,17 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:#fff;min-h
 <div class="save-modal-overlay" id="saveModalOverlay" onclick="closeSaveModal(event)">
   <div class="save-modal" onclick="event.stopPropagation()">
     <div class="save-modal-title">📸 本質結果を画像で保存</div>
-    <div class="save-modal-sub">本質タブの内容を1枚にまとめて保存できます</div>
+    <div class="save-modal-sub">画像が長くなりすぎないように、上部と下部の2枚に分けて保存できます</div>
+    <div class="save-part-tabs">
+      <button class="save-part-tab on" id="savePartTopBtn" onclick="setSavePart('upper')">① 上部（あなたの本質まで）</button>
+      <button class="save-part-tab" id="savePartBottomBtn" onclick="setSavePart('lower')">② 下部（現在の強み以降）</button>
+    </div>
     <div class="save-preview-wrap" id="savePreviewWrap">
       <div class="save-generating">✨ カード生成中...</div>
     </div>
     <div class="save-modal-btns">
       <button class="save-modal-dl" id="saveDownloadBtn" onclick="downloadCard()" disabled>
-        ⬇️ 画像をダウンロード
+        ⬇️ 選択中の画像を保存
       </button>
       <button class="save-modal-cancel" onclick="closeSaveModal()">閉じる</button>
     </div>
@@ -1458,17 +1473,34 @@ function doShare(){
 // ============================================================
 
 let cardDataURL = null;
+let savePartMode = 'upper';
 
 function openSaveModal() {
   if (!myData) return;
   const overlay = document.getElementById('saveModalOverlay');
   overlay.classList.add('open');
+  savePartMode = 'upper';
+  updateSavePartButtons();
+  renderSavePreview();
+}
+
+function setSavePart(mode){
+  savePartMode = mode;
+  updateSavePartButtons();
+  renderSavePreview();
+}
+
+function updateSavePartButtons(){
+  document.getElementById('savePartTopBtn')?.classList.toggle('on', savePartMode==='upper');
+  document.getElementById('savePartBottomBtn')?.classList.toggle('on', savePartMode==='lower');
+}
+
+function renderSavePreview(){
   const btn = document.getElementById('saveDownloadBtn');
   btn.disabled = true;
-  document.getElementById('savePreviewWrap').innerHTML = '<div class="save-generating">✨ カード生成中...</div>';
+  document.getElementById('savePreviewWrap').innerHTML = '<div class="save-generating">✨ ' + (savePartMode==='upper' ? '上部画像' : '下部画像') + 'を生成中...</div>';
   cardDataURL = null;
-  // 非同期で生成
-  setTimeout(() => generateCardCanvas(), 80);
+  setTimeout(() => generateCardCanvas(savePartMode), 60);
 }
 
 function closeSaveModal(e) {
@@ -1476,7 +1508,7 @@ function closeSaveModal(e) {
   document.getElementById('saveModalOverlay').classList.remove('open');
 }
 
-function generateCardCanvas() {
+function generateCardCanvas(mode='upper') {
   const canvas = document.getElementById('resultCardCanvas');
   const ctx = canvas.getContext('2d');
   const d = myData;
@@ -1499,78 +1531,71 @@ function generateCardCanvas() {
     : '水の人は洞察力と柔軟性が高く、相手の本音や流れを読むのが得意です。情報整理や戦略面でも強さを発揮します。';
 
   const sections = [
-    {type:'hero', h:340},
-    {type:'bizhero', h:250},
-    {type:'triple', h:224},
-    {type:'radar', h:390},
+    {key:'hero', type:'hero', h:340},
+    {key:'bizhero', type:'bizhero', h:250},
+    {key:'triple', type:'triple', h:224},
+    {key:'radar', type:'radar', h:390},
     {
-      type:'detail',
+      key:'detail-shusei', type:'detail',
       title:`⭐ 算命学主星「${d.shuseiInfo.name}」`,
       body:`${d.shuseiInfo.short}タイプ。${d.shuseiInfo.trait}
 
 ビジネスでは${d.shuseiInfo.talent}の場面で才能が出やすく、${d.shuseiInfo.weakness}が出ると本来の強みが伝わりにくくなります。`,
-      chips:[d.shuseiInfo.short,d.shuseiInfo.talent.split('・')[0],d.shuseiInfo.weakness.split('・')[0]],
-      h:260
+      chips:[d.shuseiInfo.short,d.shuseiInfo.talent.split('・')[0],d.shuseiInfo.weakness.split('・')[0]], h:260
     },
     {
-      type:'detail',
+      key:'detail-animal', type:'detail',
       title:`${d.main.emoji} 動物キャラ「${d.main.animal}」`,
       body:`${d.main.animal}のあなたは、${d.main.desc}。さらにサブタイプの${d.main.type}が重なることで、${d.main.personality}。
 
 第一印象では月柱側の${d.surf.animal}（${d.surf.type}）っぽく見られやすく、外からは親しみやすさや見せ方のうまさが伝わります。`,
-      chips:[d.main.type,d.main.animal,`${d.surf.animal}要素`],
-      h:270
+      chips:[d.main.type,d.main.animal,`${d.surf.animal}要素`], h:270
     },
     {
-      type:'detail',
+      key:'detail-gogyo', type:'detail',
       title:`☯ 日干五行「${d.dg}」`,
       body:`${gogyoLong}
 
 意思決定の軸は「${gogyoSub}」。この五行を無理に変えるより、武器として前面に出した方が結果が出やすいタイプです。`,
-      chips:[`${d.dg}の強み`,gogyoSub,'意思決定の軸'],
-      h:260
+      chips:[`${d.dg}の強み`,gogyoSub,'意思決定の軸'], h:260
     },
     {
-      type:'reading',
-      icon:'🧬',
+      key:'birth-base', type:'reading', icon:'🧬',
       title:'あなたの本質（生年月日より）',
       body:`${d.biz.baseLine}
 
 ${d.biz.baseDetail}
 
-数秘では${d.biz.lifePath}の運命数を持ちます。`,
-      h:230
+数秘では${d.biz.lifePath}の運命数を持ちます。`, h:230
     },
     {
-      type:'reading',
-      icon:'🧭',
+      key:'value', type:'reading', icon:'🧭',
       title:'現在のあなたの強み（選択結果より）',
       body:`${d.biz.valueLead}
 
-${d.biz.valueDetail}`,
-      h:250
+${d.biz.valueDetail}`, h:250
     },
-    {type:'counts', h:240},
+    {key:'counts', type:'counts', h:240},
     {
-      type:'reading',
-      icon:'🏹',
+      key:'team-role', type:'reading', icon:'🏹',
       title:'チームでの役割',
       body:`${d.biz.teamRole}
 
-${d.biz.primary.desc} その上で、${d.biz.secondary.name}の要素が加わることで、表現力・説得力・再現性のどれかが一段階引き上がります。`,
-      h:250
+${d.biz.primary.desc} その上で、${d.biz.secondary.name}の要素が加わることで、表現力・説得力・再現性のどれかが一段階引き上がります。`, h:250
     },
     {
-      type:'reading',
-      icon:'⚡',
-      title:'勝ち筋アドバイス',
-      body:d.biz.actionTip,
-      h:220
+      key:'action', type:'reading', icon:'⚡',
+      title:'勝ち筋アドバイス', body:d.biz.actionTip, h:220
     },
-    {type:'footer', h:110}
+    {key:'footer', type:'footer', h:110}
   ];
 
-  const H = sections.reduce((sum,s)=>sum+s.h,0) + PAD*2 + CARD_GAP*(sections.length-1);
+  const upperKeys = ['hero','bizhero','triple','radar','detail-shusei','detail-animal','detail-gogyo','birth-base'];
+  const lowerKeys = ['value','counts','team-role','action','footer'];
+  const activeKeys = mode==='lower' ? lowerKeys : upperKeys;
+  const activeSections = sections.filter(s => activeKeys.includes(s.key));
+
+  const H = activeSections.reduce((sum,s)=>sum+s.h,0) + PAD*2 + CARD_GAP*(activeSections.length-1);
   canvas.width = W;
   canvas.height = H;
 
@@ -1582,7 +1607,7 @@ ${d.biz.primary.desc} その上で、${d.biz.secondary.name}の要素が加わ�
   ctx.fillRect(0,0,W,H);
 
   ctx.fillStyle = 'rgba(255,255,255,0.75)';
-  for(let i=0;i<150;i++){
+  for(let i=0;i<110;i++){
     const x=Math.random()*W, y=Math.random()*H, r=Math.random()*1.8+0.3;
     ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
   }
@@ -1591,7 +1616,7 @@ ${d.biz.primary.desc} その上で、${d.biz.secondary.name}の要素が加わ�
   glow.addColorStop(0,'rgba(168,85,247,0.28)');
   glow.addColorStop(1,'rgba(168,85,247,0)');
   ctx.fillStyle = glow;
-  ctx.fillRect(0,0,W,520);
+  ctx.fillRect(0,0,W,Math.min(H,520));
 
   function fillTextWrapped(text,x,y,maxWidth,lineHeight,color,font){
     ctx.fillStyle=color;
@@ -1629,67 +1654,61 @@ ${d.biz.primary.desc} その上で、${d.biz.secondary.name}の要素が加わ�
   }
 
   let y = PAD;
-
-  drawCard(PAD,y,W-PAD*2,340,'rgba(255,255,255,0.10)','rgba(11,18,38,0.58)');
-  ctx.textAlign='center';
-  ctx.fillStyle='rgba(255,255,255,0.46)';
-  ctx.font='600 28px sans-serif';
-  ctx.fillText('宇宙三命鑑定｜本質結果カード',W/2,y+48);
-  ctx.font='120px sans-serif'; ctx.fillStyle='#fff'; ctx.fillText(d.main.emoji,W/2,y+172);
-  const ng=ctx.createLinearGradient(PAD+120,0,W-PAD-120,0); ng.addColorStop(0,'#e9d5ff'); ng.addColorStop(0.5,'#bfdbfe'); ng.addColorStop(1,'#fbcfe8');
-  ctx.fillStyle=ng; ctx.font='700 64px sans-serif'; ctx.fillText(d.main.animal,W/2,y+248);
-  ctx.fillStyle=subColor; ctx.font='600 30px sans-serif'; ctx.fillText(`${d.name} さんの本質診断`,W/2,y+292);
-  ctx.fillStyle='#fcd34d'; ctx.font='700 26px sans-serif';
-  ctx.fillText(`《 ${d.biz.primary.id}${d.biz.primary.name} × ${d.biz.secondary.id}${d.biz.secondary.name} 》`,W/2,y+326);
-  y += 340 + CARD_GAP;
-
-  drawCard(PAD,y,W-PAD*2,250,'rgba(251,191,36,0.14)','rgba(12,14,30,0.64)');
-  const bg2=ctx.createLinearGradient(PAD,y,PAD+(W-PAD*2),y+250);
-  bg2.addColorStop(0,'rgba(245,158,11,0.10)'); bg2.addColorStop(1,'rgba(168,85,247,0.08)');
-  ctx.fillStyle=bg2; roundRect(ctx,PAD,y,W-PAD*2,250,28); ctx.fill();
-  ctx.textAlign='left';
-  ctx.fillStyle='rgba(255,255,255,0.48)'; ctx.font='700 21px sans-serif'; ctx.fillText('BUSINESS BATTLE TYPE',PAD+34,y+44);
-  fillTextWrapped(d.biz.headline,PAD+34,y+84,W-PAD*2-68,42,textColor,'700 40px sans-serif');
-  let cx=PAD+34; const cy=y+164;
-  cx += chip(cx,cy,`${d.biz.primary.emoji} ${d.biz.primary.id}${d.biz.primary.name}`,'#fde68a','rgba(245,158,11,0.14)','rgba(245,158,11,0.28)') + 14;
-  cx += chip(cx,cy,`${d.biz.secondary.emoji} ${d.biz.secondary.id}${d.biz.secondary.name}`,'#ddd6fe','rgba(168,85,247,0.14)','rgba(168,85,247,0.28)') + 14;
-  chip(cx,cy,`価値観軸：${d.biz.dominant} / ${VALUE_META[d.biz.dominant].name}`,'#fcd34d','rgba(250,204,21,0.10)','rgba(250,204,21,0.28)');
-  y += 250 + CARD_GAP;
-
-  drawCard(PAD,y,W-PAD*2,224,lineColor,'rgba(10,13,26,0.56)');
-  const triples=[
-    {icon:'⭐',label:'算命学主星',value:d.shuseiInfo.name,sub:d.shuseiInfo.short,glow:'rgba(250,204,21,0.25)'},
-    {icon:d.main.emoji,label:'動物キャラ',value:d.main.animal,sub:d.main.type,glow:'rgba(236,72,153,0.18)'},
-    {icon:'☯',label:'日干五行',value:d.dg,sub:gogyoSub,glow:'rgba(96,165,250,0.18)'}
-  ];
-  triples.forEach((t,i)=>{
-    const x=PAD+28+i*((W-PAD*2-56)/3);
-    const w=(W-PAD*2-56)/3-18;
-    ctx.fillStyle=t.glow; roundRect(ctx,x,y+24,w,176,22); ctx.fill();
-    ctx.strokeStyle='rgba(255,255,255,0.07)'; roundRect(ctx,x,y+24,w,176,22); ctx.stroke();
-    ctx.textAlign='center'; ctx.fillStyle='#fff'; ctx.font='42px sans-serif'; ctx.fillText(t.icon,x+w/2,y+76);
-    ctx.fillStyle=faint; ctx.font='700 18px sans-serif'; ctx.fillText(t.label,x+w/2,y+106);
-    ctx.fillStyle=textColor; ctx.font='700 30px sans-serif'; ctx.fillText(t.value,x+w/2,y+144);
-    ctx.fillStyle=subColor; ctx.font='600 20px sans-serif'; ctx.fillText(t.sub,x+w/2,y+172);
-  });
-  y += 224 + CARD_GAP;
-
-  drawCard(PAD,y,W-PAD*2,390,lineColor,'rgba(10,13,26,0.56)');
-  ctx.textAlign='left'; ctx.fillStyle=textColor; ctx.font='700 28px sans-serif'; ctx.fillText('本質グラフ（5軸）',PAD+28,y+44);
-  const srcCanvas=document.getElementById('radarCanvas');
-  if(srcCanvas){ ctx.drawImage(srcCanvas,PAD+70,y+82,320,320); }
-  const labels=['才能','感情','社交','意志','直感'];
-  labels.forEach((lbl,i)=>{
-    const boxY=y+92+i*56;
-    drawCard(PAD+440,boxY,W-PAD*2-468,44,'rgba(255,255,255,0.05)','rgba(255,255,255,0.03)');
-    ctx.textAlign='left'; ctx.fillStyle=subColor; ctx.font='600 20px sans-serif'; ctx.fillText(lbl,PAD+460,boxY+28);
-    ctx.textAlign='right'; ctx.fillStyle='#c4b5fd'; ctx.font='700 24px sans-serif'; ctx.fillText(String(d.radarVals[i]),W-PAD-26,boxY+29); ctx.textAlign='left';
-  });
-  y += 390 + CARD_GAP;
-
-  const detailSections = sections.filter(s=>['detail','reading','counts','footer'].includes(s.type));
-  for(const s of detailSections){
-    if(s.type==='detail' || s.type==='reading'){
+  activeSections.forEach((s) => {
+    if(s.type==='hero'){
+      drawCard(PAD,y,W-PAD*2,340,'rgba(255,255,255,0.10)','rgba(11,18,38,0.58)');
+      ctx.textAlign='center';
+      ctx.fillStyle='rgba(255,255,255,0.46)';
+      ctx.font='600 28px sans-serif';
+      ctx.fillText('宇宙三命鑑定｜本質結果カード ' + (mode==='upper' ? '前半' : '後半'),W/2,y+48);
+      ctx.font='120px sans-serif'; ctx.fillStyle='#fff'; ctx.fillText(d.main.emoji,W/2,y+172);
+      const ng=ctx.createLinearGradient(PAD+120,0,W-PAD-120,0); ng.addColorStop(0,'#e9d5ff'); ng.addColorStop(0.5,'#bfdbfe'); ng.addColorStop(1,'#fbcfe8');
+      ctx.fillStyle=ng; ctx.font='700 64px sans-serif'; ctx.fillText(d.main.animal,W/2,y+248);
+      ctx.fillStyle=subColor; ctx.font='600 30px sans-serif'; ctx.fillText(`${d.name} さんの本質診断`,W/2,y+292);
+      ctx.fillStyle='#fcd34d'; ctx.font='700 26px sans-serif';
+      ctx.fillText(`《 ${d.biz.primary.id}${d.biz.primary.name} × ${d.biz.secondary.id}${d.biz.secondary.name} 》`,W/2,y+326);
+    } else if(s.type==='bizhero'){
+      drawCard(PAD,y,W-PAD*2,250,'rgba(251,191,36,0.14)','rgba(12,14,30,0.64)');
+      const bg2=ctx.createLinearGradient(PAD,y,PAD+(W-PAD*2),y+250);
+      bg2.addColorStop(0,'rgba(245,158,11,0.10)'); bg2.addColorStop(1,'rgba(168,85,247,0.08)');
+      ctx.fillStyle=bg2; roundRect(ctx,PAD,y,W-PAD*2,250,28); ctx.fill();
+      ctx.textAlign='left';
+      ctx.fillStyle='rgba(255,255,255,0.48)'; ctx.font='700 21px sans-serif'; ctx.fillText('BUSINESS BATTLE TYPE',PAD+34,y+44);
+      fillTextWrapped(d.biz.headline,PAD+34,y+84,W-PAD*2-68,42,textColor,'700 40px sans-serif');
+      let cx=PAD+34; const cy=y+164;
+      cx += chip(cx,cy,`${d.biz.primary.emoji} ${d.biz.primary.id}${d.biz.primary.name}`,'#fde68a','rgba(245,158,11,0.14)','rgba(245,158,11,0.28)') + 14;
+      cx += chip(cx,cy,`${d.biz.secondary.emoji} ${d.biz.secondary.id}${d.biz.secondary.name}`,'#ddd6fe','rgba(168,85,247,0.14)','rgba(168,85,247,0.28)') + 14;
+      chip(cx,cy,`価値観軸：${d.biz.dominant} / ${VALUE_META[d.biz.dominant].name}`,'#fcd34d','rgba(250,204,21,0.10)','rgba(250,204,21,0.28)');
+    } else if(s.type==='triple'){
+      drawCard(PAD,y,W-PAD*2,224,lineColor,'rgba(10,13,26,0.56)');
+      const triples=[
+        {icon:'⭐',label:'算命学主星',value:d.shuseiInfo.name,sub:d.shuseiInfo.short,glow:'rgba(250,204,21,0.25)'},
+        {icon:d.main.emoji,label:'動物キャラ',value:d.main.animal,sub:d.main.type,glow:'rgba(236,72,153,0.18)'},
+        {icon:'☯',label:'日干五行',value:d.dg,sub:gogyoSub,glow:'rgba(96,165,250,0.18)'}
+      ];
+      triples.forEach((t,i)=>{
+        const x=PAD+28+i*((W-PAD*2-56)/3);
+        const w=(W-PAD*2-56)/3-18;
+        ctx.fillStyle=t.glow; roundRect(ctx,x,y+24,w,176,22); ctx.fill();
+        ctx.strokeStyle='rgba(255,255,255,0.07)'; roundRect(ctx,x,y+24,w,176,22); ctx.stroke();
+        ctx.textAlign='center'; ctx.fillStyle='#fff'; ctx.font='42px sans-serif'; ctx.fillText(t.icon,x+w/2,y+76);
+        ctx.fillStyle=faint; ctx.font='700 18px sans-serif'; ctx.fillText(t.label,x+w/2,y+106);
+        ctx.fillStyle=textColor; ctx.font='700 30px sans-serif'; ctx.fillText(t.value,x+w/2,y+144);
+        ctx.fillStyle=subColor; ctx.font='600 20px sans-serif'; ctx.fillText(t.sub,x+w/2,y+172);
+      });
+    } else if(s.type==='radar'){
+      drawCard(PAD,y,W-PAD*2,390,lineColor,'rgba(10,13,26,0.56)');
+      ctx.textAlign='left'; ctx.fillStyle=textColor; ctx.font='700 28px sans-serif'; ctx.fillText('本質グラフ（5軸）',PAD+28,y+44);
+      const srcCanvas=document.getElementById('radarCanvas');
+      if(srcCanvas){ ctx.drawImage(srcCanvas,PAD+70,y+82,320,320); }
+      const labels=['才能','感情','社交','意志','直感'];
+      labels.forEach((lbl,i)=>{
+        const boxY=y+92+i*56;
+        drawCard(PAD+440,boxY,W-PAD*2-468,44,'rgba(255,255,255,0.05)','rgba(255,255,255,0.03)');
+        ctx.textAlign='left'; ctx.fillStyle=subColor; ctx.font='600 20px sans-serif'; ctx.fillText(lbl,PAD+460,boxY+28);
+        ctx.textAlign='right'; ctx.fillStyle='#c4b5fd'; ctx.font='700 24px sans-serif'; ctx.fillText(String(d.radarVals[i]),W-PAD-26,boxY+29); ctx.textAlign='left';
+      });
+    } else if(s.type==='detail' || s.type==='reading'){
       drawCard(PAD,y,W-PAD*2,s.h,lineColor,'rgba(10,13,26,0.58)');
       ctx.textAlign='left';
       ctx.fillStyle=textColor; ctx.font='700 28px sans-serif'; ctx.fillText((s.icon?`${s.icon} `:'') + s.title,PAD+28,y+46);
@@ -1698,7 +1717,6 @@ ${d.biz.primary.desc} その上で、${d.biz.secondary.name}の要素が加わ�
         let chx=PAD+28; const chy=y+s.h-62;
         s.chips.forEach((t,idx)=>{ chx += chip(chx,chy,'◎ '+t,idx===0?'#fcd34d':'#e9d5ff',idx===0?'rgba(245,158,11,0.12)':'rgba(168,85,247,0.10)',idx===0?'rgba(245,158,11,0.26)':'rgba(168,85,247,0.22)') + 12; });
       }
-      y += s.h + CARD_GAP;
     } else if(s.type==='counts'){
       drawCard(PAD,y,W-PAD*2,240,lineColor,'rgba(10,13,26,0.58)');
       ctx.fillStyle=textColor; ctx.font='700 28px sans-serif'; ctx.fillText('選択した価値観バランス',PAD+28,y+46);
@@ -1709,20 +1727,33 @@ ${d.biz.primary.desc} その上で、${d.biz.secondary.name}の要素が加わ�
         ctx.fillStyle=subColor; ctx.font='600 20px sans-serif'; ctx.fillText(`${k} / ${VALUE_META[k].name}`,bx+18,by+33);
         ctx.textAlign='right'; ctx.fillStyle='#fcd34d'; ctx.font='700 20px sans-serif'; ctx.fillText(`選択数 ${v}`,bx+412,by+33); ctx.textAlign='left';
       });
-      y += 240 + CARD_GAP;
     } else if(s.type==='footer'){
       ctx.textAlign='center';
       ctx.fillStyle='rgba(255,255,255,0.32)'; ctx.font='600 20px sans-serif'; ctx.fillText('生年月日：' + d.y + '年' + d.m + '月' + d.d + '日 / 性別：' + d.sex, W/2, y+40);
       ctx.fillStyle='rgba(255,255,255,0.24)'; ctx.font='600 18px sans-serif'; ctx.fillText('質問回答：Q1 ' + (d.answers.q1||'-') + '・Q2 ' + (d.answers.q2||'-') + '・Q3 ' + (d.answers.q3||'-'), W/2, y+72);
       ctx.fillStyle='rgba(168,85,247,0.62)'; ctx.font='700 18px sans-serif'; ctx.fillText('powered by 宇宙三命鑑定 × ビジネス戦闘タイプ診断',W/2,y+100);
-      y += 110 + CARD_GAP;
     }
-  }
+    y += s.h + CARD_GAP;
+  });
 
   cardDataURL = canvas.toDataURL('image/png');
   const preview = document.getElementById('savePreviewWrap');
   preview.innerHTML = `<img src="${cardDataURL}" alt="鑑定結果カード" style="width:100%;border-radius:14px;">`;
   document.getElementById('saveDownloadBtn').disabled = false;
+}
+
+function downloadCard() {
+  if (!cardDataURL) return;
+  const a = document.createElement('a');
+  const name = myData ? myData.name : 'result';
+  const suffix = savePartMode==='upper' ? '前半' : '後半';
+  a.download = '宇宙三命鑑定_本質結果_' + suffix + '_' + name + '.png';
+  a.href = cardDataURL;
+  a.click();
+  const t = document.getElementById('toast');
+  t.textContent = '📸 ' + (savePartMode==='upper' ? '上部画像' : '下部画像') + 'を保存しました！';
+  t.classList.add('show');
+  setTimeout(() => { t.classList.remove('show'); t.textContent = '📋 コピーしました！'; }, 2500);
 }
 
 // roundRect ヘルパー
